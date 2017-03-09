@@ -1,3 +1,3 @@
 # wrangell
 
-To compile use ghc -o wrangell --make main.hs
+To compile use simply `make`, or `ghc -o wrangell --make main.hs`
