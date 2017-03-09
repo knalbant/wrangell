@@ -6,6 +6,24 @@ import System.IO
 import Data.Char
 import Numeric
 
+{-
+  escapedChar ::= '\' ( '"' | 'n' | 'r' | 't' | '\' )
+  parseString ::= '"' { escapedChar | - ( '"' | '\' ) } '"'
+  parseAtom ::= ( letter | symbol ) { letter | synmbol | digit }
+  parseBool ::= '#' ( 't' | 'f' )
+  parseIntegral ::= digit+
+  parseDecimal ::= [ '#d' ] parseIntegral
+  parseHex ::= '#x' hexDigit+
+  parseOct ::= '#o' octDigit+
+  parseBin ::= '#b' ( '0' | '1' )+
+  parseNumber ::= parseFloat | parseDecimal | parseHex | parseOct | parseBin
+  parseFloat ::= digit+ '.' digit+
+  parseListInternals ::= '' | ( parseExpr { spaces parseExpr} )
+  parseQuoted ::= ''' parseExpr
+  parseList ::= '(' parseListInternals ')'
+  parseExpr ::= parseString | parseAtom | parseNumber | parseBool | parseQuoted | parseList
+-}
+
 symbol :: Parser Char
 symbol = oneOf "!$%&|*+-/:<=>?@^_~"
 
@@ -92,7 +110,7 @@ parseFloat = do
 
 
 --parses the internals of a list but not the parens around it
-  --just in case we want to add support for dotted lists later
+--just in case we want to add support for dotted lists later
 parseListInternals :: Parser WVal
 parseListInternals = liftM List $ sepBy parseExpr spaces
 
