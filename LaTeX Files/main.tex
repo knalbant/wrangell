@@ -1,0 +1,71 @@
+\documentclass[preprint,nocopyrightspace]{sig-alternate}
+
+% The following \documentclass options may be useful:
+%
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% authoryear    To obtain author/year citation style instead of numeric.
+
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+% standard packages that must be loaded after hyperref
+\usepackage[auth-lg]{authblk}
+\usepackage{bookmark}
+\usepackage{booktabs}
+\usepackage[final]{listings}
+\usepackage{lscape}
+\usepackage{mathtools}
+\usepackage{paralist}
+\usepackage{flushend}
+
+% local packages for just this paper
+\usepackage{natbib-cite}
+\usepackage{natbib-acm}
+
+% packages that must be loaded after both hyperref and natbib
+\usepackage{hypernat}
+\usepackage{cleveref}
+
+\crefname{section}{Section}{Sections}
+\crefname{table}{Table}{Tables}
+\crefname{figure}{Figure}{Figures}
+\crefname{subfigure}{Figure}{Figures}
+
+
+
+\begin{document}%
+
+\title{Wrangell: A Data-Wrangling DSL in Haskell}
+
+\author{Dana Iltis}
+\author{Kenan Nalbant}
+\author{Donald Pinckney}
+
+\affil{\normalsize{University of California, Davis}\\
+\{\texttt{driltis, kanalbant, djpinckney\}@ucdavis.edu}}
+
+\maketitle
+
+\begin{abstract}
+
+
+\end{abstract}
+
+\section{Introduction}
+
+\section{Motivating Example}
+
+\section{Technical Approach}
+
+\section{Experimental Evaluation}
+
+\section{Related Work}
+\citet{DBLP:conf/sc/Rubio-GonzalezNNDKSBIH13} is a sample reference.
+Sample reference \cite{DBLP:conf/sc/Rubio-GonzalezNNDKSBIH13}.
+
+\section{Conclusions}
+
+\bibliography{dblp}
+
+\end{document}
