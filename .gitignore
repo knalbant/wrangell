@@ -1,3 +1,15 @@
 *.hi
 *.o
 wrangell
+
+*.aux
+*.bbl
+*.blg
+*.log
+*.dvi
+*.out
+*.idx
+*.bak
+*.toc
+*.lof
+*~
