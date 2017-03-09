@@ -97,9 +97,6 @@ parseBin = do
   x <- many1 (oneOf "01")
   return $ (Integral . bin2dec) x
 
-parseNumber :: Parser WVal
-parseNumber = try parseFloat <|> parseDecimal <|> parseHex <|> parseOct <|> parseBin
-
 parseFloat :: Parser WVal
 parseFloat = do
   whole <- many1 digit
@@ -108,6 +105,8 @@ parseFloat = do
   let floatStr = whole ++ "." ++ frac
   return $ (Float . fst . head . readFloat) floatStr
 
+parseNumber :: Parser WVal
+parseNumber = try parseFloat <|> parseDecimal <|> parseHex <|> parseOct <|> parseBin
 
 --parses the internals of a list but not the parens around it
 --just in case we want to add support for dotted lists later
