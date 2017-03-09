@@ -3,6 +3,7 @@ import DataTypes
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad
 import System.IO
+import Data.Char
 import Numeric
 
 symbol :: Parser Char
@@ -54,7 +55,7 @@ parseIntegral = do
   return $ Integral $ read strNum
 
 parseDecimal :: Parser WVal
-parseDecimal = try ((string "#d") >> parseIntegral) <|> parseIntegral
+parseDecimal = try (string "#d" >> parseIntegral) <|> parseIntegral
 
 parseHex :: Parser WVal
 parseHex = do
@@ -70,7 +71,7 @@ parseOct = do
   return $ (Integral . fst . head . readOct) x
 
 bin2dec :: String -> Integer
-bin2dec = (foldr (\c acc -> acc * 2 + read [c]) 0) . reverse
+bin2dec = foldr (\c acc -> acc * 2 + (toInteger . digitToInt) c ) 0 . reverse
 
 parseBin :: Parser WVal
 parseBin = do
