@@ -1,7 +1,7 @@
 module Main where
 import Parser
 import System.Environment
-import Text.ParserCombinators.Parsec hiding (spaces)``
+import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad
 import System.IO
 import Numeric
