@@ -1,5 +1,6 @@
 module Evaluation (eval) where
 import Control.Monad.Except
+import Data.Maybe
 
 import DataTypes
 import Errors
@@ -12,11 +13,12 @@ eval val@(Float _) = return val
 eval (List (Atom func : args)) = mapM eval args >>= apply func
 
 apply :: String -> [WVal] -> ThrowsError WVal
-apply func args = return $ maybe (throwError badFuncError)
-                        ($ args)
-                        (lookup (func, types) funcTable)
+apply func args = if isNothing foundFunc
+    then throwError badFuncError
+    else return ((fromJust foundFunc) args)
     where types = map getType args
           badFuncError = NotFunction (func, types)
+          foundFunc = lookup (func, types) funcTable
 
 
 funcTable :: [(FuncDef, [WVal] -> WVal)]
