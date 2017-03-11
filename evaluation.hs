@@ -1,19 +1,24 @@
 module Evaluation (eval) where
+import Control.Monad.Except
+
 import DataTypes
+import Errors
 
-eval :: WVal -> WVal
-eval val@(String _) = val
-eval val@(Integral _) = val
-eval val@(Bool _) = val
-eval val@(Float _) = val
-eval (List (Atom func : args)) = apply func $ map eval args
+eval :: WVal -> ThrowsError WVal
+eval val@(String _) = return val
+eval val@(Integral _) = return val
+eval val@(Bool _) = return val
+eval val@(Float _) = return val
+eval (List (Atom func : args)) = mapM eval args >>= apply func
 
-apply :: String -> [WVal] -> WVal
-apply func args = maybe (Bool False) ($ args) $ lookup (func, types) funcTable
+apply :: String -> [WVal] -> ThrowsError WVal
+apply func args = return $ maybe (throwError badFuncError)
+                        ($ args)
+                        (lookup (func, types) funcTable)
     where types = map getType args
+          badFuncError = NotFunction (func, types)
 
 
-type FuncDef = (String, [WType])
 funcTable :: [(FuncDef, [WVal] -> WVal)]
 funcTable = 
     [
@@ -35,6 +40,9 @@ integerUnaryOp op = Integral . op . unpackInteger . head
 
 integerBinaryOp :: (Integer -> Integer -> Integer) -> [WVal] -> WVal
 integerBinaryOp op params = Integral $ foldl1 op $ map unpackInteger params
+-- integerBinaryOp op params = if length params == 2
+--     then mapM unpackInteger >>= return . Integral . foldl1 op
+--     else throwError $ NumArgs 2 params
 
 floatUnaryOp :: (Double -> Double) -> [WVal] -> WVal
 floatUnaryOp op = Float . op . unpackFloat . head

@@ -14,6 +14,7 @@ data WVal = Atom String
           | Integral Integer
           | Float Double
 
+type FuncDef = (String, [WType])
 
 instance Show WVal where show = showVal
 
