@@ -42,9 +42,6 @@ integerUnaryOp op = Integral . op . unpackInteger . head
 
 integerBinaryOp :: (Integer -> Integer -> Integer) -> [WVal] -> WVal
 integerBinaryOp op params = Integral $ foldl1 op $ map unpackInteger params
--- integerBinaryOp op params = if length params == 2
---     then mapM unpackInteger >>= return . Integral . foldl1 op
---     else throwError $ NumArgs 2 params
 
 floatUnaryOp :: (Double -> Double) -> [WVal] -> WVal
 floatUnaryOp op = Float . op . unpackFloat . head

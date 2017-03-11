@@ -24,6 +24,10 @@ readExpr input = case parse parseExpr "wrangell" input of
   Right val -> return val
 
 
-
+-- main = getArgs >>= (print . eval . readExpr . head)
 main :: IO ()
-main = getArgs >>= (print . eval . readExpr . head)
+main = do
+    args <- getArgs
+    evaled <- return $ liftM show $ readExpr (head args) >>= eval
+    putStrLn $ extractValue $ trapError evaled
+
