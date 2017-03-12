@@ -10,6 +10,7 @@ eval val@(String _) = return val
 eval val@(Integral _) = return val
 eval val@(Bool _) = return val
 eval val@(Float _) = return val
+eval (List [Atom "quote", l]) = return l
 eval (List (Atom func : args)) = mapM eval args >>= apply func
 
 apply :: String -> [WVal] -> ThrowsError WVal
