@@ -122,6 +122,7 @@ parseQuoted = do
 parseList :: Parser WVal
 parseList = do
   char '('
+  skipMany space
   res <- parseListInternals
   char ')'
   return res
