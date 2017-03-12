@@ -6,13 +6,16 @@ import DataTypes
 import Errors
 import Functions
 
-eval :: WVal -> ThrowsError WVal
-eval val@(String _) = return val
-eval val@(Integral _) = return val
-eval val@(Bool _) = return val
-eval val@(Float _) = return val
-eval (List [Atom "quote", l]) = return l
-eval (List (Atom func : args)) = mapM eval args >>= apply func
+eval :: Env -> WVal -> IOThrowsError WVal
+eval env val@(String _) = return val
+eval env val@(Integral _) = return val
+eval env val@(Bool _) = return val
+eval env val@(Float _) = return val
+eval env     (Atom id) = getVar env id
+eval env (List [Atom "quote", l]) = return l
+eval env (List [Atom "define", Atom var, form]) =
+     eval env form >>= defineVar env var
+eval env (List (Atom func : args)) = mapM (eval env) args >>= liftThrows . apply func
 
 apply :: String -> [WVal] -> ThrowsError WVal
 apply func args = if isNothing foundFunc

@@ -33,12 +33,17 @@ flushString str = putStr str >> hFlush stdout
 readPrompt :: String -> IO String
 readPrompt prompt = flushString prompt >> getLine
 
-evalString :: String -> IO String
-evalString input =
-  return . extractValue . trapError . liftM show $ readExpr input >>= eval
+evalString :: Env -> String -> IO String
+evalString env input =
+  runIOThrows $ liftM show $ (liftThrows $ readExpr input) >>= eval env
 
-evalAndPrint :: String -> IO ()
-evalAndPrint expr = evalString expr >>= putStrLn
+
+--helper function for running a single expression from the CL
+runOne :: String -> IO ()
+runOne expr = nullEnv >>= flip evalAndPrint expr
+
+evalAndPrint :: Env -> String -> IO ()
+evalAndPrint env expr = evalString env expr >>= putStrLn
 
 --do until loop where once pred evaluates to true we exit
 doUntil_ :: Monad m => (a -> Bool) ->  m a -> (a -> m ()) -> m ()
@@ -51,12 +56,12 @@ doUntil_ predicate prompt action = do
 
 
 runRepl :: IO ()
-runRepl = doUntil_ (== "quit") (readPrompt "wrangell>>> ") evalAndPrint
+runRepl = nullEnv >>= doUntil_ (== "quit") (readPrompt "wrangell>>> ")  . evalAndPrint
 
 -- main = getArgs >>= (print . eval . readExpr . head)
 main :: IO ()
 main = do args <- getArgs
           case length args of
             0 -> runRepl
-            1 -> evalAndPrint $ head args
+            1 -> runOne $ head args
             _ -> putStrLn "Usage ./wrangell expression -or- ./wrangell"
