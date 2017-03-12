@@ -24,9 +24,39 @@ readExpr input = case parse parseExpr "wrangell" input of
   Right val -> return val
 
 
+--haskell flushes the output buffer on newlines so need a reliable way of
+  --outputting to the screen when printing just a single string
+flushString :: String -> IO ()
+flushString str = putStr str >> hFlush stdout
+
+--prints the prompt and reads in input
+readPrompt :: String -> IO String
+readPrompt prompt = flushString prompt >> getLine
+
+evalString :: String -> IO String
+evalString input =
+  return . extractValue . trapError . liftM show $ readExpr input >>= eval
+
+evalAndPrint :: String -> IO ()
+evalAndPrint expr = evalString expr >>= putStrLn
+
+--do until loop where once pred evaluates to true we exit
+doUntil_ :: Monad m => (a -> Bool) ->  m a -> (a -> m ()) -> m ()
+doUntil_ predicate prompt action = do
+  userInput <- prompt
+  if predicate userInput then
+    return ()
+  else
+    action userInput >> doUntil_ predicate prompt action
+
+
+runRepl :: IO ()
+runRepl = doUntil_ (== "quit") (readPrompt "wrangell>>> ") evalAndPrint
+
 -- main = getArgs >>= (print . eval . readExpr . head)
 main :: IO ()
-main = do
-    args <- getArgs
-    let evaled = liftM show $ readExpr (args !! 0) >>= eval
-    (putStrLn . extractValue . trapError) evaled 
+main = do args <- getArgs
+          case length args of
+            0 -> runRepl
+            1 -> evalAndPrint $ head args
+            _ -> putStrLn "Usage ./wrangell expression -or- ./wrangell"
