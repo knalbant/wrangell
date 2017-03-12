@@ -62,7 +62,7 @@ setVar :: Env -> String -> WVal -> IOThrowsError WVal
 setVar envRef var value =
   do env <- liftIO $ readIORef envRef
      maybe (throwError $ UnboundVar "Setting an unbound variable" var)
-           (liftIO . (flip writeIORef value)) --do a flip since IORef value would be first 1rg to writeIORef
+           (liftIO . ( `writeIORef` value)) --the first value to writeIORef should be an IORef
            (lookup var env)
      return value
 
@@ -89,7 +89,7 @@ bindVars envRef bindings = readIORef envRef >>= extendEnv bindings >>= newIORef
 
 getType :: WVal -> WType
 getType (Atom _) = TAtom
-getType (List (l)) = TList $ map getType l
+getType (List l) = TList $ map getType l
 getType (String _) = TString
 getType (Bool _) = TBool
 getType (Integral _) = TIntegral
@@ -116,7 +116,7 @@ showError (NotFunction funcDef) = "Could not find function: " ++ show funcDef
 showError (UnboundVar message varId) = message ++ ": " ++ varId
 showError (RedefineAttempt message varId) = message ++ ": " ++ varId
 
-trapError :: (MonadError a m, Show a) => m [Char] -> m [Char]
+trapError :: (MonadError a m, Show a) => m String -> m String
 trapError action = catchError action (return . show)
 
 

@@ -89,4 +89,4 @@ funcTable =
     ]
 
 if' :: [WVal] -> WVal
-if' [condition, t, f] = if unpackBool condition then t else f  
+if' [condition, t, f] = if unpackBool condition then t else f
