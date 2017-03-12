@@ -16,13 +16,23 @@ apply :: String -> [WVal] -> ThrowsError WVal
 apply func args = if isNothing foundFunc
     then throwError badFuncError
     else return ((fromJust foundFunc) args)
-    where types = map getType args
+    where types = convertListOp $ map getType args
           badFuncError = NotFunction (func, types)
           foundFunc = lookup (func, types) funcTable
 
 
+--a hacky fix to have wrangell work with lists of the same type
+convertListOp :: [WType] -> [WType]
+convertListOp typeList =
+  if length typeList > 2 then
+    if all (== (head typeList)) typeList then take 2 typeList else typeList
+  else typeList
+
+
+
+
 funcTable :: [(FuncDef, [WVal] -> WVal)]
-funcTable = 
+funcTable =
     [
     (("+", [TIntegral, TIntegral]), integerBinaryOp (+)),
     (("+", [TFloat, TFloat]), floatBinaryOp (+)),

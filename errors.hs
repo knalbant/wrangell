@@ -5,7 +5,9 @@ import Text.ParserCombinators.Parsec hiding (spaces)
 import DataTypes
 
 data WError = Parser ParseError
-    | NotFunction FuncDef deriving (Show)
+    | NotFunction FuncDef
+
+instance Show WError where show = showError
 
 showError :: WError -> String
 showError (Parser parseError) = "Parse error at " ++ show parseError
