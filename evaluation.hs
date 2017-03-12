@@ -56,12 +56,19 @@ funcTable =
     (("/=", [TFloat, TFloat]), floatBinaryBoolOp (/=)),
     (("<=", [TFloat, TFloat]), floatBinaryBoolOp (<=)),
     ((">=", [TFloat, TFloat]), floatBinaryBoolOp (>=)),
+    (("=", [TString, TString]), stringBinaryBoolOp (==)),
+    (("<", [TString, TString]), stringBinaryBoolOp (<)),
+    ((">", [TString, TString]), stringBinaryBoolOp (>)),
+    (("/=", [TString, TString]), stringBinaryBoolOp (/=)),
+    (("<=", [TString, TString]), stringBinaryBoolOp (<=)),
+    ((">=", [TString, TString]), stringBinaryBoolOp (>=)),
     (("&&", [TBool, TBool]), boolBinaryOp (&&)),
     (("||", [TBool, TBool]), boolBinaryOp (||)),
     (("not", [TBool]), boolUnaryOp not)
     ]
 
 
+-- Math Arithmetic Function Types
 integerUnaryOp :: (Integer -> Integer) -> [WVal] -> WVal
 integerUnaryOp op = Integral . op . unpackInteger . head
 
@@ -74,12 +81,16 @@ floatUnaryOp op = Float . op . unpackFloat . head
 floatBinaryOp :: (Double -> Double -> Double) -> [WVal] -> WVal
 floatBinaryOp op params = Float $ foldl1 op $ map unpackFloat params
 
+
+-- Boolean Arithmetic Function Types
 boolUnaryOp :: (Bool -> Bool) -> [WVal] -> WVal
 boolUnaryOp op = Bool . op . unpackBool . head
 
 boolBinaryOp :: (Bool -> Bool -> Bool) -> [WVal] -> WVal
 boolBinaryOp op params = Bool $ foldl1 op $ map unpackBool params
 
+
+-- Comparision Function Types
 integerBinaryBoolOp :: (Integer -> Integer -> Bool) -> [WVal] -> WVal
 integerBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
     where unpackedParams = map unpackInteger params
@@ -87,6 +98,10 @@ integerBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $
 floatBinaryBoolOp :: (Double -> Double -> Bool) -> [WVal] -> WVal
 floatBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
     where unpackedParams = map unpackFloat params
+
+stringBinaryBoolOp :: (String -> String -> Bool) -> [WVal] -> WVal
+stringBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
+    where unpackedParams = map unpackString params
 
 unpackInteger :: WVal -> Integer
 unpackInteger (Integral n) = n
@@ -96,3 +111,6 @@ unpackFloat (Float f) = f
 
 unpackBool :: WVal -> Bool
 unpackBool (Bool b) = b
+
+unpackString :: WVal -> String
+unpackString (String s) = s
