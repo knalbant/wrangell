@@ -43,7 +43,19 @@ funcTable =
     (("*", [TIntegral, TIntegral]), integerBinaryOp (*)),
     (("*", [TFloat, TFloat]), floatBinaryOp (*)),
     (("/", [TIntegral, TIntegral]), integerBinaryOp quot),
-    (("/", [TFloat, TFloat]), floatBinaryOp (/))
+    (("/", [TFloat, TFloat]), floatBinaryOp (/)),
+    (("=", [TIntegral, TIntegral]), integerBinaryBoolOp (==)),
+    (("<", [TIntegral, TIntegral]), integerBinaryBoolOp (<)),
+    ((">", [TIntegral, TIntegral]), integerBinaryBoolOp (>)),
+    (("/=", [TIntegral, TIntegral]), integerBinaryBoolOp (/=)),
+    (("<=", [TIntegral, TIntegral]), integerBinaryBoolOp (<=)),
+    ((">=", [TIntegral, TIntegral]), integerBinaryBoolOp (>=)),
+    (("=", [TFloat, TFloat]), floatBinaryBoolOp (==)),
+    (("<", [TFloat, TFloat]), floatBinaryBoolOp (<)),
+    ((">", [TFloat, TFloat]), floatBinaryBoolOp (>)),
+    (("/=", [TFloat, TFloat]), floatBinaryBoolOp (/=)),
+    (("<=", [TFloat, TFloat]), floatBinaryBoolOp (<=)),
+    ((">=", [TFloat, TFloat]), floatBinaryBoolOp (>=))
     ]
 
 
@@ -59,7 +71,13 @@ floatUnaryOp op = Float . op . unpackFloat . head
 floatBinaryOp :: (Double -> Double -> Double) -> [WVal] -> WVal
 floatBinaryOp op params = Float $ foldl1 op $ map unpackFloat params
 
+integerBinaryBoolOp :: (Integer -> Integer -> Bool) -> [WVal] -> WVal
+integerBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
+    where unpackedParams = map unpackInteger params
 
+floatBinaryBoolOp :: (Double -> Double -> Bool) -> [WVal] -> WVal
+floatBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
+    where unpackedParams = map unpackFloat params
 
 unpackInteger :: WVal -> Integer
 unpackInteger (Integral n) = n
