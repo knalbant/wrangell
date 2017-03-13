@@ -41,11 +41,6 @@ stringBinaryBoolOp :: (String -> String -> Bool) -> [WVal] -> WVal
 stringBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
     where unpackedParams = map unpackString params
 
--- List Functions
-head' :: [WVal] -> WVal
-head' [List (x : xs)] = x
-
-
 unpackInteger :: WVal -> Integer
 unpackInteger (Integral n) = n
 
@@ -96,7 +91,6 @@ funcTable =
     (("if", [TBool, TFloat, TFloat]), if'),
     (("if", [TBool, TBool, TBool]), if'),
     (("if", [TBool, TString, TString]), if')]
-    --(("head", [TList [TIntegral,TIntegral,TIntegral]]), head' )
 
 
    
