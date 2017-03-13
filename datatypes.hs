@@ -24,6 +24,8 @@ data WError = Parser ParseError
             | NotFunction FuncDef
             | UnboundVar String String
             | RedefineAttempt String String
+            | TypeError String WVal
+            | NumArgs Integer [WVal]
 
 type Env = IORef [(String, IORef WVal)]
 
@@ -115,6 +117,12 @@ showError (Parser parseError) = "Parse error at " ++ show parseError
 showError (NotFunction funcDef) = "Could not find function: " ++ show funcDef
 showError (UnboundVar message varId) = message ++ ": " ++ varId
 showError (RedefineAttempt message varId) = message ++ ": " ++ varId
+showError (TypeError expected found) =  "Invalid type: expected " ++ expected
+                                       ++ ", found " ++ show found
+
+showError (NumArgs expected found)      = "Expected " ++ show expected
+                                          ++ " args; found values " ++ unwordsList found
+
 
 trapError :: (MonadError a m, Show a) => m String -> m String
 trapError action = catchError action (return . show)
