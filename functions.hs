@@ -1,6 +1,11 @@
 module Functions (funcTable) where
 import DataTypes
 
+
+
+
+
+
 -- Math Arithmetic Function Types
 integerUnaryOp :: (Integer -> Integer) -> [WVal] -> WVal
 integerUnaryOp op = Integral . op . unpackInteger . head
@@ -36,6 +41,11 @@ stringBinaryBoolOp :: (String -> String -> Bool) -> [WVal] -> WVal
 stringBinaryBoolOp op params = Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
     where unpackedParams = map unpackString params
 
+-- List Functions
+head' :: [WVal] -> WVal 
+head' [List (x : xs)] = x 	
+	
+	
 unpackInteger :: WVal -> Integer
 unpackInteger (Integral n) = n
 
@@ -85,7 +95,9 @@ funcTable =
     (("if", [TBool, TIntegral, TIntegral]), if'),
     (("if", [TBool, TFloat, TFloat]), if'),
     (("if", [TBool, TBool, TBool]), if'),
-    (("if", [TBool, TString, TString]), if')
+    (("if", [TBool, TString, TString]), if'),
+	(("head", [TList [TIntegral,TIntegral,TIntegral]]), head' )
+	
     ]
 
 if' :: [WVal] -> WVal
