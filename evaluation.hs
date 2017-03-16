@@ -1,10 +1,12 @@
-module Evaluation (eval) where
+--module Evaluation (eval) where
+module Evaluation where
 import Control.Monad.Except
 import Data.Maybe
 
 import DataTypes
 import Errors
 import Functions
+
 
 eval :: Env -> WVal -> IOThrowsError WVal
 eval env val@(String _) = return val
@@ -28,18 +30,32 @@ eval env (List [Atom "define", Atom var, form]) =
 eval env (List (Atom func : args)) = mapM (eval env) args >>= liftThrows . apply func
 
 
-apply :: String -> [WVal] -> ThrowsError WVal
+{-- apply :: String -> [WVal] -> ThrowsError WVal
 apply func args = if isNothing foundFunc
     then throwError badFuncError
     else return (fromJust foundFunc args)
+
     where types = convertListOp $ map getType args
           badFuncError = NotFunction (func, types)
-          foundFunc = lookup (func, types) funcTable
+          foundFunc = lookup func funcTable
 
 
+--}
+
+apply :: String -> [WVal] -> ThrowsError WVal
+apply func args =
+    if isNothing funcDef
+      then throwError $ NotFunction "Unrecognized primitive function args" func
+      else fromJust funcDef args
+    where funcDef = lookup func funcTable
+
+
+{--
 --a hacky fix to have wrangell work with lists of the same type
 convertListOp :: [WType] -> [WType]
 convertListOp typeList =
   if length typeList > 2 && (all (== head typeList) typeList)
     then take 2 typeList
     else typeList
+
+--}

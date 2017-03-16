@@ -22,8 +22,9 @@ integerUnaryOp :: (Integer -> Integer) -> [WVal] -> ThrowsError WVal
 --integerUnaryOp op = Integral . op . unpackInteger . head
 integerUnaryOp op params =
   --check the precondidtions
-  checkLength (==) 1 params >>= checkAllType TIntegral "one integral" . unpackList >>=
-    return . Integral . op . unpackInteger . head . unpackList
+  checkLength (==) 1 params >>=
+    checkAllType TIntegral "one integral" . unpackList >>=
+      return . Integral . op . unpackInteger . head . unpackList
 
 
 integerBinaryOp :: (Integer -> Integer -> Integer) -> [WVal] -> ThrowsError WVal

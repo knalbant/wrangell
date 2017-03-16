@@ -21,7 +21,7 @@ data WVal = Atom String
           | Float Double
 
 data WError = Parser ParseError
-            | NotFunction FuncDef
+            | NotFunction String String
             | UnboundVar String String
             | RedefineAttempt String String
             | TypeError String WVal
@@ -114,7 +114,7 @@ showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 
 showError :: WError -> String
 showError (Parser parseError) = "Parse error at " ++ show parseError
-showError (NotFunction funcDef) = "Could not find function: " ++ show funcDef
+showError (NotFunction message func) = message ++ " " ++ func
 showError (UnboundVar message varId) = message ++ ": " ++ varId
 showError (RedefineAttempt message varId) = message ++ ": " ++ varId
 showError (TypeError expected found) =  "Invalid type: expected " ++ expected
