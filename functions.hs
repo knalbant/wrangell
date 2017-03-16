@@ -95,6 +95,17 @@ stringBinaryBoolOp op params = do --Bool $ foldl (\b (x, y) -> b && (op x y)) Tr
     return $ Bool $ and $ zipWith op unpackedParams $ tail unpackedParams
     where unpackedParams = map unpackString params
 
+car :: [WVal] -> ThrowsError WVal
+car [List (x : _)] = return x
+car [badArg]       = throwError $ TypeError "pair" badArg
+car badArgList     = throwError $ NumArgs 1 badArgList
+
+cdr :: [WVal] -> ThrowsError WVal
+cdr [List (_ : xs)] = return $ List xs
+cdr [badArg]       = throwError $ TypeError "pair" badArg
+cdr badArgList     = throwError $ NumArgs 1 badArgList
+
+
 if' :: [WVal] -> ThrowsError WVal
 if' ifComps = do
   --error checking
@@ -141,7 +152,6 @@ funcTable =
     ("*", floatBinaryOp (*)),
     ("/", integerBinaryOp quot),
     ("/", floatBinaryOp (/)),
-
     ("=", integerBinaryBoolOp (==)),
     ("<", integerBinaryBoolOp (<)),
     (">", integerBinaryBoolOp (>)),
@@ -163,5 +173,7 @@ funcTable =
     ("&&", boolBinaryOp (&&)),
     ("||", boolBinaryOp (||)),
     ("not", boolUnaryOp not),
-    ("if", if')
+    ("if", if'),
+    ("car", car),
+    ("cdr", cdr)
     ]
