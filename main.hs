@@ -8,6 +8,7 @@ import Numeric
 
 import Parser
 import Evaluation
+import Functions
 import DataTypes
 import Errors
 
@@ -37,10 +38,15 @@ evalString :: Env -> String -> IO String
 evalString env input =
   runIOThrows $ liftM show $ (liftThrows $ readExpr input) >>= eval env
 
+--injects our builtins into defined labels
+primitiveBindings :: IO Env
+primitiveBindings = nullEnv >>= (flip bindVars $ map makePrimitiveFunc funcTable)
+  where makePrimitiveFunc (name, func) = (name, BuiltIn func)
+
 
 --helper function for running a single expression from the CL
 runOne :: String -> IO ()
-runOne expr = nullEnv >>= flip evalAndPrint expr
+runOne expr = primitiveBindings >>= flip evalAndPrint expr
 
 evalAndPrint :: Env -> String -> IO ()
 evalAndPrint env expr = evalString env expr >>= putStrLn
@@ -56,7 +62,7 @@ doUntil_ predicate prompt action = do
 
 
 runRepl :: IO ()
-runRepl = nullEnv >>= doUntil_ (== "quit") (readPrompt "wrangell>>> ")  . evalAndPrint
+runRepl = primitiveBindings >>= doUntil_ (== "quit") (readPrompt "wrangell>>> ")  . evalAndPrint
 
 -- main = getArgs >>= (print . eval . readExpr . head)
 main :: IO ()

@@ -2,7 +2,7 @@ module DataTypes where
 
 import Control.Monad.Except
 import Text.ParserCombinators.Parsec hiding (spaces)
-
+import Data.Maybe
 
 import Data.IORef
 
@@ -19,7 +19,7 @@ data WVal = Atom String
           | Bool Bool
           | Integral Integer
           | Float Double
-          | BuiltIn ([LispVal] -> ThrowsError LispVal)
+          | BuiltIn ([WVal] -> ThrowsError WVal)
           | Func { params :: [String], body :: [WVal], closure :: Env }
 
 data WError = Parser ParseError
@@ -46,12 +46,14 @@ nullEnv :: IO Env
 nullEnv = newIORef []
 
 
+makeFunc env params body = return $ Func (map show params) body env
+
 runIOThrows :: IOThrowsError String -> IO String
 runIOThrows action = runExceptT (trapError action) >>= return . extractValue
 
 --checks whether a variable is bound or not
 isBound :: Env -> String -> IO Bool
-isBound envRef var = readIORef envRef >>= return . maybe False (const True) . lookup var
+isBound envRef var = readIORef envRef >>= return . isJust . lookup var
 
 getVar :: Env -> String -> IOThrowsError WVal
 getVar envRef var =
@@ -113,9 +115,8 @@ showVal (Integral n)    = show n
 showVal (Float f)       = show f
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 showVal (BuiltIn _)     = "<BuiltIn function>"
-showVal (Func {params = params,
-               body   = body,
-               env    = env}) = "(lambda (" ++ unwords (map show args) ++ ") ...)"
+showVal (Func args body env)
+         = "(lambda (" ++ unwords (map show args) ++ ") ...)"
 
 
 showError :: WError -> String
