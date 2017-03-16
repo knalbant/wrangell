@@ -19,6 +19,8 @@ data WVal = Atom String
           | Bool Bool
           | Integral Integer
           | Float Double
+          | BuiltIn ([LispVal] -> ThrowsError LispVal)
+          | Func { params :: [String], body :: [WVal], closure :: Env }
 
 data WError = Parser ParseError
             | NotFunction String String
@@ -110,6 +112,10 @@ showVal (Bool False)    = "#f"
 showVal (Integral n)    = show n
 showVal (Float f)       = show f
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
+showVal (BuiltIn _)     = "<BuiltIn function>"
+showVal (Func {params = params,
+               body   = body,
+               env    = env}) = "(lambda (" ++ unwords (map show args) ++ ") ...)"
 
 
 showError :: WError -> String
