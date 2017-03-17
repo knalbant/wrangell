@@ -121,7 +121,7 @@ floatBinaryBoolOp op params = do --Bool $ foldl (\b (x, y) -> b && (op x y)) Tru
 
 stringBinaryBoolOp :: (String -> String -> Bool) -> [WVal] -> ThrowsError WVal
 stringBinaryBoolOp op params = do --Bool $ foldl (\b (x, y) -> b && (op x y)) True $ zip unpackedParams (tail unpackedParams)
-    params <- checkLength (>=) 2 params >>= checkAllTypes TBool "2 or more booleans" . unpackList
+    params <- checkLength (>=) 2 params >>= checkAllTypes TString "2 or more strings" . unpackList
     return $ Bool $ and $ zipWith op unpackedParams $ tail unpackedParams
     where unpackedParams = map unpackString params
 
