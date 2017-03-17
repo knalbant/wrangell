@@ -2,7 +2,7 @@ module DataTypes where
 
 import Control.Monad.Except
 import Text.ParserCombinators.Parsec hiding (spaces)
-
+import Data.Maybe
 
 import Data.IORef
 
@@ -19,9 +19,11 @@ data WVal = Atom String
           | Bool Bool
           | Integral Integer
           | Float Double
+          | BuiltIn ([WVal] -> ThrowsError WVal)
+          | Func { params :: [String], body :: [WVal], closure :: Env }
 
 data WError = Parser ParseError
-            | NotFunction FuncDef
+            | NotFunction String String
             | UnboundVar String String
             | RedefineAttempt String String
             | TypeError String WVal
@@ -35,6 +37,8 @@ type ThrowsError = Either WError
 
 type FuncDef = (String, [WType])
 
+type Table = IORef [[WVal]] -- TODO: This will be a bit different
+
 
 instance Show WError where show = showError
 
@@ -43,13 +47,19 @@ instance Show WVal where show = showVal
 nullEnv :: IO Env
 nullEnv = newIORef []
 
+--creates a new empty table context
+emptyTable :: IO Table
+emptyTable = newIORef [[]]
+
+
+makeFunc env params body = return $ Func (map show params) body env
 
 runIOThrows :: IOThrowsError String -> IO String
 runIOThrows action = runExceptT (trapError action) >>= return . extractValue
 
 --checks whether a variable is bound or not
 isBound :: Env -> String -> IO Bool
-isBound envRef var = readIORef envRef >>= return . maybe False (const True) . lookup var
+isBound envRef var = readIORef envRef >>= return . isJust . lookup var
 
 getVar :: Env -> String -> IOThrowsError WVal
 getVar envRef var =
@@ -110,11 +120,14 @@ showVal (Bool False)    = "#f"
 showVal (Integral n)    = show n
 showVal (Float f)       = show f
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
+showVal (BuiltIn _)     = "<BuiltIn function>"
+showVal (Func args body env)
+         = "(lambda (" ++ unwords (map show args) ++ ") ...)"
 
 
 showError :: WError -> String
 showError (Parser parseError) = "Parse error at " ++ show parseError
-showError (NotFunction funcDef) = "Could not find function: " ++ show funcDef
+showError (NotFunction message func) = message ++ " " ++ func
 showError (UnboundVar message varId) = message ++ ": " ++ varId
 showError (RedefineAttempt message varId) = message ++ ": " ++ varId
 showError (TypeError expected found) =  "Invalid type: expected " ++ expected
@@ -134,3 +147,18 @@ liftThrows (Right val) = return val
 
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
+
+unpackInteger :: WVal -> Integer
+unpackInteger (Integral n) = n
+
+unpackFloat :: WVal -> Double
+unpackFloat (Float f) = f
+
+unpackBool :: WVal -> Bool
+unpackBool (Bool b) = b
+
+unpackString :: WVal -> String
+unpackString (String s) = s
+
+unpackList :: WVal -> [WVal]
+unpackList (List l) = l
