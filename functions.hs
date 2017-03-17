@@ -3,6 +3,7 @@ module Functions (funcTable) where
 
 import DataTypes
 import Data.List
+import Data.Maybe
 import Control.Monad.Except
 
 
@@ -31,6 +32,35 @@ checkAllTypes expectedType message vals =
 checkType :: WType -> WVal -> ThrowsError WVal
 checkType wType val = if getType val == wType
                       then return val else throwError $ TypeError "bool" val
+
+
+getFunc opStr = fromJust $ lookup opStr funcTable'
+
+
+--could abstract these next two functions things but w/ever
+numericBinaryOp :: String -> [WVal] -> ThrowsError WVal
+numericBinaryOp opStr params = do
+  checkLength (>=) 2 params
+  case getType $ head params of TIntegral -> (getFunc $ 'i':opStr) params
+                                TFloat    -> (getFunc $ 'f':opStr) params
+                                _         -> throwError $ TypeError "a numeric type" $ head params
+
+numericUnaryOp :: String -> [WVal] -> ThrowsError WVal
+numericUnaryOp opStr params = do
+  checkLength (==) 1 params
+  case getType $ head params of TIntegral -> (getFunc $ 'i':opStr) params
+                                TFloat    -> (getFunc $ 'f':opStr) params
+                                _         -> throwError $ TypeError "a numeric type" $ head params
+
+
+binaryCompOp :: String -> [WVal] -> ThrowsError WVal
+binaryCompOp opStr params = do
+  checkLength (>=) 2 params
+  case getType $ head params of TIntegral -> (getFunc $ 'i':opStr) params
+                                TFloat    -> (getFunc $ 'f':opStr) params
+                                TString   -> (getFunc $ 's':opStr) params
+                                _         -> throwError $ TypeError "a numeric type" $ head params
+
 
 -- Math Arithmetic Function Types
 integerUnaryOp :: (Integer -> Integer) -> [WVal] -> ThrowsError WVal
@@ -139,40 +169,67 @@ unpackString (String s) = s
 unpackList :: WVal -> [WVal]
 unpackList (List l) = l
 
-funcTable :: [(String, [WVal] -> ThrowsError WVal)]
-funcTable =
+funcTable' :: [(String, [WVal] -> ThrowsError WVal)]
+funcTable' =
     [
-    ("-", integerUnaryOp (0-)),
-    ("+", integerBinaryOp (+)),
-    ("+", floatBinaryOp (+)),
-    ("-", integerBinaryOp (-)),
-    ("-", floatBinaryOp (-)),
-    ("-", floatUnaryOp (0-)),
-    ("*", integerBinaryOp (*)),
-    ("*", floatBinaryOp (*)),
-    ("/", integerBinaryOp quot),
-    ("/", floatBinaryOp (/)),
-    ("=", integerBinaryBoolOp (==)),
-    ("<", integerBinaryBoolOp (<)),
-    (">", integerBinaryBoolOp (>)),
-    ("/=", integerBinaryBoolOp (/=)),
-    ("<=", integerBinaryBoolOp (<=)),
-    (">=", integerBinaryBoolOp (>=)),
-    ("=", floatBinaryBoolOp (==)),
-    ("<", floatBinaryBoolOp (<)),
-    (">", floatBinaryBoolOp (>)),
-    ("/=", floatBinaryBoolOp (/=)),
-    ("<=", floatBinaryBoolOp (<=)),
-    (">=", floatBinaryBoolOp (>=)),
-    ("=", stringBinaryBoolOp (==)),
-    ("<", stringBinaryBoolOp (<)),
-    (">", stringBinaryBoolOp (>)),
-    ("/=", stringBinaryBoolOp (/=)),
-    ("<=", stringBinaryBoolOp (<=)),
-    (">=", stringBinaryBoolOp (>=)),
+    ("ineg", integerUnaryOp (0-)),
+    ("i+", integerBinaryOp (+)),
+    ("f+", floatBinaryOp (+)),
+    ("i-", integerBinaryOp (-)),
+    ("f-", floatBinaryOp (-)),
+    ("fneg", floatUnaryOp (0-)),
+    ("i*", integerBinaryOp (*)),
+    ("f*", floatBinaryOp (*)),
+    ("i/", integerBinaryOp quot),
+    ("f/", floatBinaryOp (/)),
+    ("i=", integerBinaryBoolOp (==)),
+    ("i<", integerBinaryBoolOp (<)),
+    ("i>", integerBinaryBoolOp (>)),
+    ("i/=", integerBinaryBoolOp (/=)),
+    ("i<=", integerBinaryBoolOp (<=)),
+    ("i>=", integerBinaryBoolOp (>=)),
+    ("f=", floatBinaryBoolOp (==)),
+    ("f<", floatBinaryBoolOp (<)),
+    ("f>", floatBinaryBoolOp (>)),
+    ("f/=", floatBinaryBoolOp (/=)),
+    ("f<=", floatBinaryBoolOp (<=)),
+    ("f>=", floatBinaryBoolOp (>=)),
+    ("s=", stringBinaryBoolOp (==)),
+    ("s<", stringBinaryBoolOp (<)),
+    ("s>", stringBinaryBoolOp (>)),
+    ("s/=", stringBinaryBoolOp (/=)),
+    ("s<=", stringBinaryBoolOp (<=)),
+    ("s>=", stringBinaryBoolOp (>=)),
+
     ("&&", boolBinaryOp (&&)),
     ("||", boolBinaryOp (||)),
     ("not", boolUnaryOp not),
+    ("if", if'),
+    ("car", car),
+    ("cdr", cdr)
+    ]
+
+
+funcTable :: [(String, [WVal] -> ThrowsError WVal)]
+funcTable =
+    [
+    ("neg", numericUnaryOp "neg"),
+
+    ("+", numericBinaryOp "+"),
+    ("-", numericBinaryOp "-"),
+    ("*", numericBinaryOp "*"),
+    ("/", numericBinaryOp "/"),
+
+    ("=", binaryCompOp "="),
+    ("<", binaryCompOp "<"),
+    (">", binaryCompOp ">"),
+    ("/=", binaryCompOp "/="),
+    ("<=", binaryCompOp "<="),
+    (">=", binaryCompOp ">="),
+
+    ("||", boolBinaryOp (||)),
+    ("not", boolUnaryOp (not)),
+    ("&&", boolBinaryOp (&&)),
     ("if", if'),
     ("car", car),
     ("cdr", cdr)
