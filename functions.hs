@@ -154,21 +154,6 @@ if' ifComps = do
         t    = ifComps !! 1
         f    = ifComps !! 2
 
-unpackInteger :: WVal -> Integer
-unpackInteger (Integral n) = n
-
-unpackFloat :: WVal -> Double
-unpackFloat (Float f) = f
-
-unpackBool :: WVal -> Bool
-unpackBool (Bool b) = b
-
-unpackString :: WVal -> String
-unpackString (String s) = s
-
-unpackList :: WVal -> [WVal]
-unpackList (List l) = l
-
 funcTable' :: [(String, [WVal] -> ThrowsError WVal)]
 funcTable' =
     [
@@ -230,7 +215,7 @@ funcTable =
     ("||", boolBinaryOp (||)),
     ("not", boolUnaryOp (not)),
     ("&&", boolBinaryOp (&&)),
-    ("if", if'),
+    --("if", if'),
     ("car", car),
     ("cdr", cdr)
     ]

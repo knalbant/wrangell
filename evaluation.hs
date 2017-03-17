@@ -18,6 +18,14 @@ eval env _ val@(Bool _) = return val
 eval env _ val@(Float _) = return val
 eval env _    (Atom id) = getVar env id
 eval env _ (List [Atom "quote", l]) = return l
+
+eval env table (List [Atom "if", cond, t, f]) = do
+  res <- eval env table cond
+  if unpackBool res
+    then eval env table t
+    else eval env table f
+
+
 eval env table (List [Atom "define", Atom var, form]) =
       eval env table form >>= defineVar env var
 eval env _ (List (Atom "define" : List (Atom var : params) : body)) = do
@@ -26,7 +34,7 @@ eval env _ (List (Atom "lambda" : List params : body)) =
       makeFunc env params body
 
 eval env table (List [Atom "dropColumn", val]) = dropColumn env table val
-eval env table (List ((Atom "formatTable") : (Atom filetype) : formats)) = 
+eval env table (List ((Atom "formatTable") : (Atom filetype) : formats)) =
       formatTable env table filetype formats
 
 eval env table (List (fname : args)) = do --mapM (eval env) args >>= liftThrows . apply func
@@ -38,8 +46,6 @@ eval env table (List (fname : args)) = do --mapM (eval env) args >>= liftThrows 
 apply :: Table -> WVal -> [WVal] -> IOThrowsError WVal
 apply table (BuiltIn func) args = liftThrows $ func args
 apply table (Func params body closure) args = do
-  liftIO $ putStrLn $ unwords $ map show params
-  liftIO $ putStrLn $ unwords $ map show body
   if num params /= num args then throwError $ NumArgs (num params) args
                             else captureVars >>= evalBody
 

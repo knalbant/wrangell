@@ -147,3 +147,18 @@ liftThrows (Right val) = return val
 
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
+
+unpackInteger :: WVal -> Integer
+unpackInteger (Integral n) = n
+
+unpackFloat :: WVal -> Double
+unpackFloat (Float f) = f
+
+unpackBool :: WVal -> Bool
+unpackBool (Bool b) = b
+
+unpackString :: WVal -> String
+unpackString (String s) = s
+
+unpackList :: WVal -> [WVal]
+unpackList (List l) = l
