@@ -37,6 +37,8 @@ type ThrowsError = Either WError
 
 type FuncDef = (String, [WType])
 
+type Table = IORef [[WVal]] -- TODO: This will be a bit different
+
 
 instance Show WError where show = showError
 
@@ -44,6 +46,10 @@ instance Show WVal where show = showVal
 
 nullEnv :: IO Env
 nullEnv = newIORef []
+
+--creates a new empty table context
+emptyTable :: IO Table
+emptyTable = newIORef [[]]
 
 
 makeFunc env params body = return $ Func (map show params) body env
