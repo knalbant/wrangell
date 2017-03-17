@@ -34,9 +34,9 @@ flushString str = putStr str >> hFlush stdout
 readPrompt :: String -> IO String
 readPrompt prompt = flushString prompt >> getLine
 
-evalString :: Env -> String -> IO String
-evalString env input =
-  runIOThrows $ liftM show $ (liftThrows $ readExpr input) >>= eval env
+evalString :: Env -> Table -> String -> IO String
+evalString env table input =
+  runIOThrows $ liftM show $ (liftThrows $ readExpr input) >>= eval env table
 
 --injects our builtins into defined labels
 primitiveBindings :: IO Env
@@ -46,10 +46,13 @@ primitiveBindings = nullEnv >>= (flip bindVars $ map makePrimitiveFunc funcTable
 
 --helper function for running a single expression from the CL
 runOne :: String -> IO ()
-runOne expr = primitiveBindings >>= flip evalAndPrint expr
+runOne expr = do
+  binds <- primitiveBindings
+  table <- emptyTable
+  evalAndPrint binds table expr
 
-evalAndPrint :: Env -> String -> IO ()
-evalAndPrint env expr = evalString env expr >>= putStrLn
+evalAndPrint :: Env -> Table -> String -> IO ()
+evalAndPrint env table expr = evalString env table expr >>= putStrLn
 
 --do until loop where once pred evaluates to true we exit
 doUntil_ :: Monad m => (a -> Bool) ->  m a -> (a -> m ()) -> m ()
@@ -62,7 +65,10 @@ doUntil_ predicate prompt action = do
 
 
 runRepl :: IO ()
-runRepl = primitiveBindings >>= doUntil_ (== "quit") (readPrompt "wrangell>>> ")  . evalAndPrint
+runRepl = do
+  binds <- primitiveBindings
+  table <- emptyTable
+  doUntil_ (== "quit") (readPrompt "wrangell>>> ") (evalAndPrint binds table)
 
 -- main = getArgs >>= (print . eval . readExpr . head)
 main :: IO ()
