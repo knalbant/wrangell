@@ -25,6 +25,10 @@ readExpr input = case parse parseExpr "wrangell" input of
   Right val -> return val
 
 
+--readExpr     = readOrThrow parseExpr
+--readExprList = readOrThrow (endBy parseExpr space)
+
+
 --haskell flushes the output buffer on newlines so need a reliable way of
   --outputting to the screen when printing just a single string
 flushString :: String -> IO ()

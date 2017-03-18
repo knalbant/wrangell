@@ -45,6 +45,7 @@ eval env table (List (fname : args)) = do --mapM (eval env) args >>= liftThrows 
 
 apply :: Table -> WVal -> [WVal] -> IOThrowsError WVal
 apply table (BuiltIn func) args = liftThrows $ func args
+apply table (IOFunc func)  args = func args
 apply table (Func params body closure) args = do
   if num params /= num args then throwError $ NumArgs (num params) args
                             else captureVars >>= evalBody

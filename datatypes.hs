@@ -3,6 +3,7 @@ module DataTypes where
 import Control.Monad.Except
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Data.Maybe
+import System.IO
 
 import Data.IORef
 
@@ -21,6 +22,9 @@ data WVal = Atom String
           | Float Double
           | BuiltIn ([WVal] -> ThrowsError WVal)
           | Func { params :: [String], body :: [WVal], closure :: Env }
+          | IOFunc ([WVal] -> IOThrowsError WVal)
+          | Port Handle
+
 
 data WError = Parser ParseError
             | NotFunction String String
@@ -123,6 +127,8 @@ showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 showVal (BuiltIn _)     = "<BuiltIn function>"
 showVal (Func args body env)
          = "(lambda (" ++ unwords (map show args) ++ ") ...)"
+showVal  (Port  _)      = "<IO Port>"
+showVal (IOFunc _)      = "<IOFunc>"
 
 
 showError :: WError -> String
