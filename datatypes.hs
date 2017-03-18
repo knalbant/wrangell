@@ -37,7 +37,11 @@ type ThrowsError = Either WError
 
 type FuncDef = (String, [WType])
 
-type Table = IORef [[WVal]] -- TODO: This will be a bit different
+data Table' = Table' { rows :: [[WVal]],
+                    inputFileName :: Maybe String,
+                    outputFileName :: Maybe String
+                  }
+type Table = IORef Table' -- TODO: This will be a bit different
 
 
 instance Show WError where show = showError
@@ -49,7 +53,11 @@ nullEnv = newIORef []
 
 --creates a new empty table context
 emptyTable :: IO Table
-emptyTable = newIORef [[]]
+emptyTable = newIORef Table' { 
+  rows=[[]], 
+  inputFileName=Nothing,
+  outputFileName=Nothing 
+}
 
 
 makeFunc env params body = return $ Func (map show params) body env
