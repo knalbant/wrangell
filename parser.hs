@@ -111,7 +111,7 @@ parseNumber = try parseFloat <|> parseDecimal <|> parseHex <|> parseOct <|> pars
 --parses the internals of a list but not the parens around it
 --just in case we want to add support for dotted lists later
 parseListInternals :: Parser WVal
-parseListInternals = liftM List $ sepBy parseExpr spaces
+parseListInternals = liftM List $ sepEndBy parseExpr spaces
 
 parseQuoted :: Parser WVal
 parseQuoted = do
