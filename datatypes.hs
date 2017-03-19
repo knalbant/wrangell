@@ -25,6 +25,7 @@ data WVal = Atom String
           | Func { params :: [String], body :: [WVal], closure :: Env }
           | IOFunc ([WVal] -> IOThrowsError WVal)
           | Port Handle
+          | Unit 
 
 
 data WError = Parser ParseError
