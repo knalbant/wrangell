@@ -33,6 +33,7 @@ data WError = Parser ParseError
             | RedefineAttempt String String
             | TypeError String WVal
             | NumArgs Integer [WVal]
+            | FormatSpec String [WVal]
 
 type Env = IORef [(String, IORef WVal)]
 
@@ -149,6 +150,8 @@ showError (TypeError expected found) =  "Invalid type: expected " ++ expected
 showError (NumArgs expected found)      = "Expected " ++ show expected
                                           ++ " args; found values " ++ unwordsList found
 
+showError (FormatSpec message values) = message ++ unwordsList values
+
 
 trapError :: (MonadError a m, Show a) => m String -> m String
 trapError action = catchError action (return . show)
@@ -160,6 +163,9 @@ liftThrows (Right val) = return val
 
 extractValue :: ThrowsError a -> a
 extractValue (Right val) = val
+
+unpackAtom :: WVal -> String
+unpackAtom (Atom str) = str
 
 unpackInteger :: WVal -> Integer
 unpackInteger (Integral n) = n

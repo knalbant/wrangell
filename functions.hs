@@ -1,4 +1,4 @@
-module Functions (funcTable) where
+module Functions (funcTable, checkLength, checkAllTypes) where
 
 
 import DataTypes
