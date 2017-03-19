@@ -21,16 +21,19 @@ typeTable = [
             ("bool", TBool)
             ]
 
-checkLength :: [WVal] -> IOThrowsError WVal
-checkLength formats = if length formats < 1
-                      then throwError $ FormatSpec "Formats should have at least one element found: " formats
-                      else return Unit
+checkLengthFormats :: Table' -> [WVal] -> IOThrowsError WVal
+checkLengthFormats table formats = 
+    if length formats < 1
+        then throwError $ FormatSpec "Formats should have at least one element found: " formats
+    else if (length $ labels table) > 0 && (length formats) /= (length $ labels table)
+        then throwError $ FormatSpec "Formats should have the same length as labels: " formats
+    else return Unit
 checkLengthLabels :: Table' -> [WVal] -> IOThrowsError WVal
 checkLengthLabels table labels = 
     if length labels < 1
         then throwError $ FormatSpec "Labels should have at least one element found: " labels
-    else if (length labels) /= (length $ format table)
-        then throwError $ FormatSpec "Labels should have at least one element found: " labels
+    else if (length $ format table) > 0 && (length labels) /= (length $ format table)
+        then throwError $ FormatSpec "Labels should have the same length as formats: " labels
     else return Unit
 
 checkAllAtoms :: [WVal] -> IOThrowsError WVal
@@ -46,12 +49,12 @@ checkAllUnique labels wlabels = if allUnique labels
 
 formatTable :: Env -> Table -> [WVal] -> IOThrowsError WVal
 formatTable env table formats = do
+  unWrappedTable <- liftIO $ readIORef table
 
   --prechecks
-  checkLength formats
+  checkLengthFormats unWrappedTable formats
   checkAllAtoms formats
 
-  unWrappedTable <- liftIO $ readIORef table
 
   let formatStrList = atomList2StrList formats
 
