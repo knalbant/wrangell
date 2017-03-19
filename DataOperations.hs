@@ -23,19 +23,32 @@ typeTable = [
             ]
 
 checkLengthFormats :: Table' -> [WVal] -> IOThrowsError WVal
-checkLengthFormats table formats = 
-    if length formats < 1
-        then throwError $ FormatSpec "Formats should have at least one element found: " formats
-    else if (length $ labels table) > 0 && (length formats) /= (length $ labels table)
-        then throwError $ FormatSpec "Formats should have the same length as labels: " formats
-    else return Unit
+checkLengthFormats table formats
+  | null formats =
+    throwError $
+      FormatSpec "Formats should have at least one element found: " formats
+
+  | not (null (format table)) &&
+      length formats /= length (labels table)
+    =
+    throwError $
+      FormatSpec "Formats should have the same length as labels: " formats
+
+  | otherwise = return Unit
+
 checkLengthLabels :: Table' -> [WVal] -> IOThrowsError WVal
-checkLengthLabels table labels = 
-    if length labels < 1
-        then throwError $ FormatSpec "Labels should have at least one element found: " labels
-    else if (length $ format table) > 0 && (length labels) /= (length $ format table)
-        then throwError $ FormatSpec "Labels should have the same length as formats: " labels
-    else return Unit
+checkLengthLabels table labels
+  | null labels =
+    throwError $
+      FormatSpec "Labels should have at least one element found: " labels
+
+  | not (null (format table)) &&
+      length labels /= length (format table)
+    =
+    throwError $
+      FormatSpec "Labels should have the same length as formats: " labels
+
+  | otherwise = return Unit
 
 checkAllAtoms :: [WVal] -> IOThrowsError WVal
 checkAllAtoms formats = if all (==TAtom) $ map getType formats
@@ -66,11 +79,11 @@ formatTable env table formats = do
     then do
       let modTable = formatHelp unWrappedTable $ fromJust res
       liftIO $ writeIORef table modTable
-      return $ Unit
+      return Unit
     else
       throwError $
       FormatSpec ("Format specifiers are one of " ++
-                  (unwords $ map fst typeTable) ++ " found: ") formats
+                  unwords (map fst typeTable) ++ " found: ") formats
 
         --returns a new table with format filled in
   where formatHelp tab formatList = tab { format = formatList  }
@@ -116,6 +129,6 @@ dropColumn env table val = throwError $ TypeError "Invalid type for dropColumn" 
 doTableWrite :: Env -> Table -> (Env -> Table' -> Table') -> IOThrowsError WVal
 doTableWrite env table f = do
     unwrappedTable <- liftIO $ readIORef table
-    let t = f env unwrappedTable 
+    let t = f env unwrappedTable
     liftIO $ writeIORef table t
     return Unit
