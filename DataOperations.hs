@@ -13,7 +13,12 @@ formatTable env table formats = do
 
 
 setDelimiter :: Env -> Table -> String -> IOThrowsError WVal
-setDelimiter env table delimiter = 
+setDelimiter env table delim = do
+    unwrappedTable <- liftIO $ readIORef table
+    liftIO $ writeIORef table (unwrappedTable {delimiter = delim})
+    return $ Integral 0
+
+-- setDelimiter' :: Table' -> String {}
 
 dropColumn :: Env -> Table -> WVal -> IOThrowsError WVal
 dropColumn env table (Integral index) = return $ Integral 0
