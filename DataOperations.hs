@@ -115,8 +115,3 @@ doTableWrite env table f = do
     let (t, ret) = f env unwrappedTable 
     liftIO $ writeIORef table t
     return $ ret
-
-
-
-unpackAtomString :: WVal -> String
-unpackAtomString (Atom s) = s
