@@ -1,7 +1,7 @@
 module DataTypes where
 
 import Control.Monad.Except
-import Text.ParserCombinators.Parsec hiding (spaces)
+import Text.ParserCombinators.Parsec hiding (spaces, labels)
 import Data.Maybe
 import System.IO
 
@@ -42,7 +42,7 @@ type ThrowsError = Either WError
 
 type FuncDef = (String, [WType])
 
-data Table' = Table' { rows :: [[WVal]], format :: [WType], delimiter :: String}
+data Table' = Table' { rows :: [[WVal]], format :: [WType], labels :: [String], delimiter :: String}
 type Table = IORef Table' -- TODO: This will be a bit different
 
 
@@ -58,6 +58,7 @@ emptyTable :: IO Table
 emptyTable = newIORef Table' {
   rows   = [[]],
   format = [],
+  labels = [],
   delimiter = ","
 }
 
