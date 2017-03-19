@@ -5,6 +5,7 @@ import ArgParsing
 import Data.IORef
 import Data.Char
 import Data.Maybe
+import CSV
 
 allUnique :: (Eq a) => [a] -> Bool
 allUnique [] = True

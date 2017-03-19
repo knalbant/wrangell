@@ -21,11 +21,11 @@ Haskell Parsec parsers for comma-separated value (CSV) files.
 Written by John Goerzen, jgoerzen\@complete.org
 -}
 
-module Data.CSV (csvFile, genCsvFile) where
+module CSV (csvFile, genCsvFile) where
 import Text.ParserCombinators.Parsec
 import Data.List (intersperse)
 
-eol :: forall st. GenParser Char st String
+-- eol :: forall st. GenParser Char st String
 eol = (try $ string "\n\r") <|> (try $ string "\r\n") <|> string "\n" <|>
       string "\r" <?> "End of line"
 
@@ -43,8 +43,8 @@ quotedcell = do char '"'
                 char '"'
                 return content
 
-line :: GenParser Char st [String]
-line = sepBy cell (char ',')
+line :: Char -> GenParser Char st [String]
+line delim = sepBy cell (char delim)
 
 {- | Parse a Comma-Separated Value (CSV) file.  The return value is a list of
 lines; each line is a list of cells; and each cell is a String.
@@ -84,16 +84,16 @@ Please note that the result of parsing will be of type
 For more details, see the Parsec information.
 -}
 
-csvFile :: CharParser st [[String]]
-csvFile = endBy line eol
+csvFile :: Char -> CharParser st [[String]]
+csvFile delim = endBy (line delim) eol
 
 {- | Generate CSV data for a file.  The resulting string can be
 written out to disk directly. -}
-genCsvFile :: [[String]] -> String
-genCsvFile inp =
+genCsvFile :: Char -> [[String]] -> String
+genCsvFile delim inp =
     unlines . map csvline $ inp
     where csvline :: [String] -> String
-          csvline l = concat . intersperse "," . map csvcells $ l
+          csvline l = concat . intersperse [delim] . map csvcells $ l
           csvcells :: String -> String
           csvcells "" = ""
           csvcells c = '"' : convcell c ++ "\""
