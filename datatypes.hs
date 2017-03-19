@@ -12,7 +12,8 @@ data WType = TAtom
     | TString
     | TBool
     | TIntegral
-    | TFloat deriving (Show, Eq)
+    | TFloat 
+    | TTop deriving (Show, Eq)  -- Everythign is a subtype of Top
 
 data WVal = Atom String
           | List [WVal]
@@ -25,6 +26,7 @@ data WVal = Atom String
           | Func { params :: [String], body :: [WVal], closure :: Env }
           | IOFunc ([WVal] -> IOThrowsError WVal)
           | Port Handle
+          | Top -- Everythign is a subtype of Top
           | Unit 
 
 
