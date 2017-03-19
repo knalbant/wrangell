@@ -92,22 +92,9 @@ runFile args = do
   table <- emptyTable
   bindings <- primitiveBindings
 
-
   env <- bindVars bindings $ [("args", List $ map String wArgs)]
 
-  --mapM (eval env table) (load filename)
-
-
   (runIOThrows $ liftM show $ load filename >>= eval env table . Seq) >>= putStrLn
-
-
-  --return ()
-
-
-
-
-
-
 
 
 runRepl :: IO ()

@@ -59,3 +59,5 @@ apply table (Func params body closure) args = do
   where num = toInteger . length --neccesary as length returns and Int not Integer
         captureVars  = liftIO $ bindVars closure $ zip params args
         evalBody env = liftM last $ mapM (eval env table) body
+
+apply _ val _ = throwError $ NotFunction "Attempted to call non-function" $ show val
