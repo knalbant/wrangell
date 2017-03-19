@@ -42,8 +42,7 @@ type ThrowsError = Either WError
 
 type FuncDef = (String, [WType])
 
-data Table' = Table' { rows :: [[WVal]]
-                  }
+data Table' = Table' { rows :: [[WVal]], format :: [WType]}
 type Table = IORef Table' -- TODO: This will be a bit different
 
 
@@ -56,8 +55,9 @@ nullEnv = newIORef []
 
 --creates a new empty table context
 emptyTable :: IO Table
-emptyTable = newIORef Table' { 
-  rows=[[]]
+emptyTable = newIORef Table' {
+  rows   = [[]],
+  format = []
 }
 
 
