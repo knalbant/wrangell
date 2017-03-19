@@ -1,4 +1,4 @@
-module Parser (parseExpr) where
+module Parser (parseExpr, spacesNewLines, spaces) where
 import DataTypes
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad
@@ -30,6 +30,9 @@ symbol = oneOf "!$%&|*+-/:<=>?@^_~"
 --returns a parser combinator which skips spaces
 spaces :: Parser ()
 spaces = skipMany1 space
+
+spacesNewLines :: Parser ()
+spacesNewLines = skipMany1 space <|> skipMany1 newline
 
 escapedChar :: Parser Char
 escapedChar = do
@@ -111,7 +114,7 @@ parseNumber = try parseFloat <|> parseDecimal <|> parseHex <|> parseOct <|> pars
 --parses the internals of a list but not the parens around it
 --just in case we want to add support for dotted lists later
 parseListInternals :: Parser WVal
-parseListInternals = liftM List $ sepBy parseExpr spaces
+parseListInternals = liftM List $ sepEndBy parseExpr spaces
 
 parseQuoted :: Parser WVal
 parseQuoted = do

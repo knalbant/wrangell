@@ -21,6 +21,7 @@ data WVal = Atom String
           | Integral Integer
           | Float Double
           | BuiltIn ([WVal] -> ThrowsError WVal)
+          | Seq [WVal]
           | Func { params :: [String], body :: [WVal], closure :: Env }
           | IOFunc ([WVal] -> IOThrowsError WVal)
           | Port Handle
