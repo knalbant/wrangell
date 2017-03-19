@@ -42,9 +42,16 @@ eval env table (List (fname : args)) = do --mapM (eval env) args >>= liftThrows 
       argVals <- mapM (eval env table) args --get the arguments
       apply table func argVals
 
+eval env table (Seq [])  = return $ List [] --just in case
+eval env table (Seq [l]) = eval env table l
+eval env table (Seq (c:rest)) = do
+  eval env table c
+  eval env table $ Seq rest
+
 
 apply :: Table -> WVal -> [WVal] -> IOThrowsError WVal
 apply table (BuiltIn func) args = liftThrows $ func args
+apply table (IOFunc func)  args = func args
 apply table (Func params body closure) args = do
   if num params /= num args then throwError $ NumArgs (num params) args
                             else captureVars >>= evalBody

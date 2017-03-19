@@ -1,4 +1,4 @@
-module Parser (parseExpr) where
+module Parser (parseExpr, spacesNewLines, spaces) where
 import DataTypes
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad
@@ -30,6 +30,9 @@ symbol = oneOf "!$%&|*+-/:<=>?@^_~"
 --returns a parser combinator which skips spaces
 spaces :: Parser ()
 spaces = skipMany1 space
+
+spacesNewLines :: Parser ()
+spacesNewLines = skipMany1 space <|> skipMany1 newline
 
 escapedChar :: Parser Char
 escapedChar = do
