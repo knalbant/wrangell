@@ -1,9 +1,11 @@
 module DataOperations where
 import DataTypes
 import Control.Monad.Except
+import ArgParsing
 
 formatTable :: Env -> Table -> String -> [WVal] -> IOThrowsError WVal
 formatTable env table filetype formats = return $ Integral 0
+    where inFileName = getParsedArgs env >>= getInputFile
 
 
 dropColumn :: Env -> Table -> WVal -> IOThrowsError WVal

@@ -37,9 +37,7 @@ type ThrowsError = Either WError
 
 type FuncDef = (String, [WType])
 
-data Table' = Table' { rows :: [[WVal]],
-                    inputFileName :: Maybe String,
-                    outputFileName :: Maybe String
+data Table' = Table' { rows :: [[WVal]]
                   }
 type Table = IORef Table' -- TODO: This will be a bit different
 
@@ -54,9 +52,7 @@ nullEnv = newIORef []
 --creates a new empty table context
 emptyTable :: IO Table
 emptyTable = newIORef Table' { 
-  rows=[[]], 
-  inputFileName=Nothing,
-  outputFileName=Nothing 
+  rows=[[]]
 }
 
 
