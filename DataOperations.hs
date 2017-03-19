@@ -43,7 +43,7 @@ checkAllAtoms formats = if all (==TAtom) $ map getType formats
 
 checkAllUnique :: [String] -> [WVal] -> IOThrowsError WVal
 checkAllUnique labels wlabels = if allUnique labels
-                        then return $ Integral 0 --basically just a dummy value
+                        then return $ Unit --basically just a dummy value
                         else throwError $ FormatSpec "Labels should be all unique: " wlabels
 
 
@@ -82,7 +82,7 @@ formatTable env table formats = do
 
 setDelimiter :: Env -> Table -> String -> IOThrowsError WVal
 setDelimiter env table delim = 
-    doTableWrite env table (\e t -> (t {delimiter = delim}, Unit))
+    doTableWrite env table (\e t -> t {delimiter = delim})
 
 setLabels :: Env -> Table -> [WVal] -> IOThrowsError WVal
 setLabels env table labels = do
@@ -112,9 +112,9 @@ dropColumn env table val = throwError $ TypeError "Invalid type for dropColumn" 
 
 
 -- Helper function
-doTableWrite :: Env -> Table -> (Env -> Table' -> (Table', WVal)) -> IOThrowsError WVal
+doTableWrite :: Env -> Table -> (Env -> Table' -> Table') -> IOThrowsError WVal
 doTableWrite env table f = do
     unwrappedTable <- liftIO $ readIORef table
-    let (t, ret) = f env unwrappedTable 
+    let t = f env unwrappedTable 
     liftIO $ writeIORef table t
-    return $ ret
+    return Unit
