@@ -36,6 +36,7 @@ eval env _ (List (Atom "lambda" : List params : body)) =
 eval env table (List [Atom "dropColumn", val]) = dropColumn env table val
 eval env table (List ((Atom "formatTable") : (Atom filetype) : formats)) =
       formatTable env table filetype formats
+eval env table (List [Atom "delimiter", String delimiter]) = setDelimiter env table delimiter
 
 eval env table (List (fname : args)) = do --mapM (eval env) args >>= liftThrows . apply func
       func    <- eval env table fname    --get the function
