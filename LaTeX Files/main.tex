@@ -8,6 +8,7 @@
 
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{mathtools}
 
 % standard packages that must be loaded after hyperref
 \usepackage[auth-lg]{authblk}
@@ -18,14 +19,17 @@
 \usepackage{mathtools}
 \usepackage{paralist}
 \usepackage{flushend}
-
 % local packages for just this paper
 \usepackage{natbib-cite}
 \usepackage{natbib-acm}
+\usepackage{mathtools}
 
 % packages that must be loaded after both hyperref and natbib
 \usepackage{hypernat}
 \usepackage{cleveref}
+
+\usepackage{proof}
+\usepackage{mathtools}
 
 \crefname{section}{Section}{Sections}
 \crefname{table}{Table}{Tables}
@@ -48,24 +52,143 @@
 \maketitle
 
 \begin{abstract}
+Managing data from various document types (e.g. txt, csv) often requires manual work by a user. For simple operations like extracting a particular column from the similar data tables in many txt files, we sought to create a tool which is simple, fast, and integrates easily into normal file management activities. We present Wrangell, a DSL which facilitates data extraction from .txt documents via a command line. 
+
+We wrote Wrangell in Haskell, a functional programming language which is useful for its (Kenan placeholder). We based our DSL on Scheme, a Lisp-like language known for its  simplicity.
+
+For our prototype we used Wrangell to extract data from tables composed of rows and columns wherein the first row contains a series of labels, one for each column. Wrangell can extract data per a desired column label (as opposed to a column index). This allows extraction of a certain column from files wherein column order might vary. 
+
+Run via the command line, and given input and output file names, Wrangell parses data in the input file, modifies it, and writes it to the output file. This simplicity is desirable as it would facilitate ease of integration of Wrangell into potential future data management projects.    
+
 
 
 \end{abstract}
 
 \section{Introduction}
+We built Wrangell as a prototype for a simple tool to extract and manipulate data from files. Wrangell expects data to be formatted per the following example (by default, Wrangell expects a comma as the delimiter between columns: 
+\begin{figure}
+\begin{verbatim}
+filename: peopleA.txt
 
-\section{Motivating Example}
+name,	age,	gender,	hometown,		Favorite Food,	SocSecNum
+kenan,	40,	M,		Cupertino,		Crepes,			11112222333
+dana,	25,	F,		Santa Barbara,	Cheetos,		11133661
+donald,	17,	M,		Davis,			Milk,			888176162
 
-\section{Technical Approach}
 
-\section{Experimental Evaluation}
+filename: peopleB.txt
+
+name,	age,	gender,	Favorite Food,	school,				SocSecNum
+Dale,	40,	M,		Coffee,			Dartmouth			8716268282
+Audrey,	18,	F,		Coffee,			Twin Peaks High,	82377266378
+Laura,	17,	F,		Cereal,			Twin Peaks High,	828138921
+Bobby,	17,	M,		Bacon,			Twin Peaks High,	898709809
+Hawk,	34,	M,		Doughnuts,		Brandeis,			55154226
+Ben,	48,	M,		Brie sandwich,	USC,				556363
+Hank,	34,	M,		Dominoes,		Prison GED Program,	8872211`
+Leo,	32,	M,		Raw Hamburger,	Sarah Lawrence,		837428937
+
+
+filename: peopleC.txt
+
+name,	age,	gender,	SocSecNum,		hometown,		Spouse
+Jax,	33,	M,		8376499281,		Charming,		Tara
+LuAnn,	18,	F,		98349823,		Twin Peaks,		Otto
+Tig,	45,	M,		0002928181,		Phoenix,		n/a
+Bobby,	51,	M,		73727627618,	Austin,			n/a
+Clay,	54,	M,		67257632617,	Charming,		Gemma
+Juice,	31,	M,		8794861321,		Philly,			n/a
+Tara,	3,	M,		6534654215,		Charming,		Jax
+
+\end{verbatim}
+\end{figure}
+
+In this example, we might want to share the files peopleA.txt, peopleB.txt, and peopleC.txt with some third party. But first we need to remove the sensitive information (e.g. "SocSecNum" ). We could manually go through all of the files, manually removing the social security number column from each. But if we had, say, 100 files, this would be very expensive. By using Wrangell we would hope to create some modified versions of the files ("mod\_peopleA.txt", "mod\_peopleB.txt", and "mod\_peopleC.txt") with easily copy-pasted commands in the command line.
+
+For our project we wanted to design and implement a small language to accomplish this task. Group teammate Kenan Nalbant suggested Haskell because it (). 
+
+$\\\\\\\\\\$
+
+
+\section{Approach}
+
+First, we designed our Wrangell functions, determining their big-step semantics as follows:
+
+
+
+\onecolumn
+\begin{enumerate}
+\item Table$\\$
+\begin{equation*}
+\Sigma = \bigcup_{n=1,r=1}^{\infty}  \{M|t_i \epsilon T, m_{*i} \epsilon V(t_i:r),l_i \epsilon \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
+\end{equation*}
+$\sigma[M] = (t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*n}), (l_1,l_2,...,l_n)$
+
+\item Drop Column$\\$
+\begin{equation*}
+\infer{<dropCol \ name, \sigma> \Downarrow \\
+\sigma ' 
+}{<name,\sigma> \Downarrow l_i}
+\end{equation*}
+$\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},t_{i+1},...,t_n),(m_{*1},m_{*2},...,m_{*{i-1}},m_{*{i+1}},...,m_{*n}), (l_1,l_2,...,l_{i-1},l_{i+1},...,l_n)\}$
+
+\item Drop Row$\\$\\
+\begin{equation*}
+\infer{<dropRow \ \lambda, \sigma> \Downarrow \\
+\sigma ' 
+}{m_{*i}'=\{m_{ji}|<\lambda m_{ji}, \sigma> \Downarrow False\}}
+\end{equation*}
+$\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1}',m_{*2}',...,m_{*n}'), (l_1,l_2,...,l_n)\}$
+
+\item Insert Column$\\$
+\begin{equation*}
+\infer{<insertCol  \ type \ name \ j , \sigma> \Downarrow \\
+\sigma ' 
+}{j \epsilon [1,n+1], \ name \ \epsilon \{l_1,l_2,...,l_n\}}
+\end{equation*}
+$\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,m_{*n}), (l_1,l_2,...,name,...,l_n)\}$
+
+\end{enumerate}
+\twocolumn
+
+
+
+Big step semantics for our functions in Wrangell:
+
+\section{Implementation and Results}
+We created our own parser in Haskell... 
+One of our biggest challenges was to improve our level of Haskell coding expertise...
+
+Getting Wrangell to read in files:
+
+What Wrangell can do:
+
+
+Lenses: 
 
 \section{Related Work}
-\citet{DBLP:conf/sc/Rubio-GonzalezNNDKSBIH13} is a sample reference.
-Sample reference \cite{DBLP:conf/sc/Rubio-GonzalezNNDKSBIH13}.
+
+Our research centered on learning Haskell and finding ways to generate desired behaviors. 
+
+The most challenging concept for us was Monad Transformations. 
+ 
+
+
+We researched current data-wrangling tools, and found ().
+Tool1()
+Tool2()
+...The benefits of Wrangell over these tools is (speed?) . 
+
+
+Data wrangling likes functional programming because functional programming is all about input transformation and output. 
 
 \section{Conclusions}
+Wrangell 
 
-\bibliography{dblp}
+
+For future work:
+
+
+\section{References}
 
 \end{document}
