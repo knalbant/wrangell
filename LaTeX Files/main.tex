@@ -23,6 +23,10 @@
 \usepackage{natbib-cite}
 \usepackage{natbib-acm}
 \usepackage{mathtools}
+\usepackage{float}
+\floatstyle{boxed} 
+\restylefloat{figure}
+
 
 % packages that must be loaded after both hyperref and natbib
 \usepackage{hypernat}
@@ -38,7 +42,8 @@
 
 \begin{document}%
 
-\title{Wrangell: A Data-Wrangling DSL in Haskell}
+%\title{Wrangell: A Data-Wrangling DSL in Haskell}
+\title{God Damn Monads: Dropping the Mic on Wrangell}
 
 \author{Dana Iltis}
 \author{Kenan Nalbant}
@@ -50,21 +55,21 @@
 \maketitle
 
 \begin{abstract}
-Managing data from various document types (e.g. txt, csv files) often requires manual work by a user. We present Wrangell, a fast, simple domain-specific language for common data manipulation tasks.
+Managing data from various document types (e.g. txt, csv files) often requires manual work by a user. We present Wrangell, a domain-specific language for common data manipulation tasks.
 
-Run from the command line, Wrangell is specifically designed to modify tables of data wherein columns are separated by a user-specified delimiter. Wrangell has functions to read in a file, parse the data, and run a transformation on the table, and write the modified table to an output file. 
+Run from the command line, Wrangell is specifically designed to modify tables of data wherein columns are separated by a user-specified delimiter. Wrangell has functions to read in a file, parse the data, run a transformation on the table, and write the modified table to an output file. 
 
 We implemented Wrangell in Haskell, a functional programming language. We chose Haskell for its powerful type system which allows a large amount of control over how operations behave when handed various data types. Furthermore, as a functional programming language, Haskell is a good choice for tasks which depend on running transformations on data.
 
-We based Wrangell on Scheme, a Lisp-like language known for its simplicity. Wrangell’s simplicity is desirable as it would facilitate ease of integration into potential future data management projects.
+We based Wrangell on Scheme, a Lisp-like language known for its simplicity. Wrangell's simplicity is desirable as it would facilitate ease of integration into potential future data management projects.
 
 
 \end{abstract}
 
 \section{Introduction}
-For our project, we wanted to design and implement a small language. Haskell was an attractive tool because of its type system which makes data types immutable and allows for algebraic definition of types. Furthermore, our team members had either a beginner or intermediate level of Haskell knowledge, so we saw this as an opportunity to learn something new. 
+For our project, we wanted to design and implement a small language. Haskell was an attractive tool because of its type system in which data types are immutable and are defined algebraically. Furthermore, our team members had either a beginner or intermediate level of Haskell knowledge, so we saw this as an opportunity to learn something new. 
 
-To keep the scope of our language’s features manageable, we chose to gear our language to a specific domain. Because Haskell is a functional language, we thought that \emph{data-wrangling}, with its emphasis on data transformations, would be a good application for our language implemented in Haskell. We began creating Wrangell, a DSL for ``WRANGling’’ data via ``haskELL’’.  
+To keep the scope of our language's features manageable, we chose to gear our it to a specific domain. Because Haskell is a functional language, we thought that \emph{data-wrangling}, with its emphasis on data transformations, would be a good application for our language implemented in Haskell. We began creating Wrangell, a DSL for ``WRANGling'' data via ``haskELL''.  
 
 We focused our desired data-wrangling tasks on one format: a table of data in a csv file, wherein we recognize rows via lines of the file, and columns per a user-specified delimiter. The following operations would initially be included in Wrangell:
 
@@ -75,8 +80,18 @@ We focused our desired data-wrangling tasks on one format: a table of data in a 
 \item Write the transformed data to an output file
 \end{enumerate}
 
-More specifically, the transformation operations in Wrangell would allow users to:
+A motivating example for Wrangell could be the following: A small business has many csv files (say, one for each year the company has been active) with customer data. Each file has a column for various items including the customer's name, address, phone number, and credit card number. Now say the business wanted to contract some advertising company to mail a promotional catalog to each of its customers. In this case, the business would want to share its customer database with the advertising company. However, sharing customer credit card information with the advertising company would be both unnecessary and dangerous. In this case,  the business would want an easy way to make copies of the customer information files with the credit card information column removed.   
 
+
+\section{Approach}
+
+Because our team memebers only had beginner or intermediate levels of Haskell knowledge, we chose to keep Wrangell's data management operations fairly simple. 
+As a result, Wranagell's application subjects are limited to tables of data wherein columns were separated by either a comma or a user-specified delimiter.
+
+We determined big-step semantics for Wrangell's operations (Figure 1).
+Then we planned to apply Wrangell's data manipulation features to a variety of csv files with a data table formatted per the example in Figure 2.
+
+We decided that Wrangell should support the following transformation operations:
 \begin{enumerate}
 \item Remove a column
 \item Insert a column
@@ -84,67 +99,12 @@ More specifically, the transformation operations in Wrangell would allow users t
 \item Insert a row
 \end{enumerate}
 
-A motivating example for Wrangell could be the following: A small business has many csv files (say, one for each year the company has been active) with customer data. Each file has a column for various items including the customer's name, address, phone number, and credit card number. Now say the business wanted to contract some advertising company to mail a promotional catalog to each of its customers. In this case, the business would want to share its customer database with the advertising company. However, sharing customer credit card information with the advertising company would be both unnecessary and dangerous. In this case,  the business would want an easy way to make copies of the customer information files with the credit card information column removed.   
-
-$\\\\\\\\\\$
-
-
-\section{Approach}
-
-Because our team memebers only had beginner or intermediate levels of Haskell knowledge, we chose to keep Wrangell's data management operations fairly simple. 
-As a result, Wranagell's application subjects are limited to tables of data wherein columns were separated by either a comma, or a user-specified delimiter (example, figure () )
-
-We determined big-step semantics for Wrangell's operations in figure (placeholder).
-
-
-Finally we planned to apply Wrangell's data manipulation featues to a variety of csv files. Examples of our desired behavior for Wrangell are illustrated in figure (placeholder). 
-
-
-
-In this example, we might want to share the files peopleA.txt, peopleB.txt, and peopleC.txt with some third party. But first we need to remove the sensitive information (e.g. "SocSecNum" ). We could manually go through all of the files, manually removing the social security number column from each. But if we had, say, 100 files, this would be very expensive. By using Wrangell we would hope to create some modified versions of the files ("mod\_peopleA.txt", "mod\_peopleB.txt", and "mod\_peopleC.txt") with easily copy-pasted commands in the command line.
-
-
-Wrangell expects data to be formatted per the following example (by default, Wrangell expects a comma as the delimiter between columns: 
-\begin{figure}
-\begin{verbatim}
-filename: peopleA.txt
-
-name,	age,	gender,	hometown,		Favorite Food,	SocSecNum
-kenan,	40,	M,		Cupertino,		Crepes,			11112222333
-dana,	25,	F,		Santa Barbara,	Cheetos,		11133661
-donald,	17,	M,		Davis,			Milk,			888176162
-
-
-filename: peopleB.txt
-
-name,	age,gender,	Favorite Food,	school,				SocSecNum
-Dale,	40,	M,		Coffee,			Dartmouth			8716268282
-Audrey,	18,	F,		Coffee,			Twin Peaks High,	82377266378
-Laura,	17,	F,		Cereal,			Twin Peaks High,	828138921
-Bobby,	17,	M,		Bacon,			Twin Peaks High,	898709809
-Hawk,	34,	M,		Doughnuts,		Brandeis,			55154226
-Ben,	48,	M,		Brie sandwich,	USC,				556363
-Hank,	34,	M,		Dominoes,		Prison GED Program,	8872211`
-Leo,	32,	M,		Raw Hamburger,	Sarah Lawrence,		837428937
-
-
-filename: peopleC.txt
-
-name,	age,gender,	SocSecNum,		hometown,		Spouse
-Jax,	33,	M,		8376499281,		Charming,		Tara
-LuAnn,	18,	F,		98349823,		Twin Peaks,		Otto
-Tig,	45,	M,		0002928181,		Phoenix,		n/a
-Bobby,	51,	M,		73727627618,	Austin,			n/a
-Clay,	54,	M,		67257632617,	Charming,		Gemma
-Juice,	31,	M,		8794861321,		Philly,			n/a
-Tara,	3,	M,		6534654215,		Charming,		Jax
-
-\end{verbatim}
-\end{figure}
-
+Blah blah blah. other stuff about the approach. 
 
 
 \onecolumn
+\begin{figure}
+\caption{Big-step semantics for Wrangell's table manipulation functions}
 \begin{enumerate}
 \item Table$\\$
 \begin{equation*}
@@ -175,26 +135,51 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1}',m_{*2}',...,m_{*n}'), (l_1,l_2,..
 }{j \epsilon [1,n+1], \ name \ \epsilon \{l_1,l_2,...,l_n\}}
 \end{equation*}
 $\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,m_{*n}), (l_1,l_2,...,name,...,l_n)\}$
-
 \end{enumerate}
+\end{figure}
+\begin{figure}
+\caption{Example of a Wrangell-compatible data table}
+Filename: twinPeaksPeople.csv
+\\\\
+Name,   Age,Gender,	Favorite Food,	School,				Social Security Number \\
+Dale,   40,	M,		Coffee,			Dartmouth			111111111\\
+Audrey, 18,	F,		Coffee,			Twin Peaks High,	888888888\\
+Laura,  17,	F,		Cereal,			Twin Peaks High,	000000000\\
+Bobby,  17,	M,		Bacon,			Twin Peaks High,	333333333\\
+Hawk,   34,	M,		Doughnuts,		Brandeis,			111223333\\
+Ben,    48,	M,		Brie sandwich,	USC,				444556666\\
+Hank,   34,	M,		Dominoes,		Prison GED Program,	888116666\\
+Leo,    32,	M,		Raw Hamburger,	Sarah Lawrence,		000996666\\
+Jacoby,  51, M,		Coconuts,		USC,				000997777\\
+Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\		
+\end{figure} 
 \twocolumn
+
 
 \section{Implementation and Results}
 We ran into several challenges when writing our Wrangell code in Haskell. Most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. 
 
-\subsection{Modifying Information in an Immutable State}
-One challenge was to store information about the contents of the input file. This conflicts with the idea that a functional limits its environment to an ``immutable state''. For example, Wrangell would need to store the parsed data table from each input file. Additionally, Wrangell needs to modify the data table. Our solution was to perform operations within the \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions''. This allows us to mimic imperative behavior without requiring mutability of variables.  
+\subsection{Modifying Data in an Immutable State}
+Our first challenge was getting Wrangell to store information about the contents of the input file. This conflicts with the idea that a functional language limits its environment to an ``immutable state''. For example, Wrangell would need to store the parsed data table from each input file. Additionally, Wrangell needs to modify the data table. Our solution was to perform operations within the \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions''. This allows us to mimic imperative behavior without requiring mutability of variables.  
 The below example demonstrates our use of the IO monad during construction of an empty data table for later use: 
+\begin{figure}
+\caption{Creation of the `Table' data type within the IO Monad}
 \begin{lstlisting}
 -- datatypes.hs --
 import Data.IORef
+.
+.
+.
 data Table' = 
 Table' { rows :: [[WVal]], 
          format :: [WType], 
          labels :: [String], 
          delimiter :: String}
-type Table = IORef Table' -- TODO: This will be a bit different
-
+type Table = IORef Table' 
+-- TODO: This will be a bit different
+.
+.
+.
 --creates a new empty table context
 emptyTable :: IO Table
 emptyTable = new IORef Table' {    
@@ -204,7 +189,7 @@ emptyTable = new IORef Table' {
   delimiter = ","
 }
 \end{lstlisting}
-
+\end{figure}
 Because emptyTable is in the IO monad, we can later () as follows:
 \begin{lstlisting}
 --blah blah blah
@@ -218,54 +203,64 @@ We describe monads and IO further in ‘Related Work’ below.
 
 \subsection{Type System Flexibility}
 The second challenge was creating a type system which was flexible enough to achieve our desired level of expressiveness while still behaving within the confines of Haskell's type system. We initially defined functions in 'functable' as follows:
+\begin{figure}
+\caption{Inflexible type system: Type-checking occurs in funcTable, no type-checking in `'if' function definition}
 \begin{lstlisting}
 -- functions.hs --
-funcTable :: [(FuncDef, [WVal] -> WVal)] -- what is FuncDef? ()???
+.
+.
+.
+funcTable :: [(FuncDef, [WVal] -> WVal)] 
 functable = [
-	.
-	.
-	.    
-     (("if", [TBool, TFloat, TFloat]), if'),
-     (("if", [TBool, TBool, TBool]), if'),
-     (("car", [TList [TIntegral,TIntegral,TIntegral]]), car' )]
-     
-     .
-     .
-     .
-     
-     
-     if' :: [WVal] -> WVal
-     if' [condition, t, f] = if unpackBool condition then t else f
+   (("if", [TBool, TFloat, TFloat]), if'),
+   (("if", [TBool, TBool, TBool]), if'),
+   (("car", [TList [TIntegral,TIntegral]]), 
+      car' )]    
+.
+.
+.          
+if' :: [WVal] -> WVal
+if' [condition, t, f] = 
+    if unpackBool condition then t else f
 
 \end{lstlisting}
+\end{figure}
 In this strategy we use funcTable to constrain exactly what inputs a function can accept. However, for the car function (which computes the first item of a list), in order to describe lists of varying length and types, we would have to include a line (an instance of the funcTable? class?) for every possible combination of lengths and types!
 
-Our solution (below) was to move the constraining of what inputs a function can accept into the functions themselves. This allows more flexibility in funcTable. However, because it woul dnow be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution, described in related work, was to implement type-safe exception handling via the Either monad. 
+Our solution (Figure 5) was to move the type-checking of inputs into the functions themselves. This allows more flexibility in funcTable. However, because it would now be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution, described in related work, was to implement type-safe exception handling via the Either monad. 
+
+\begin{figure}
+\caption{type-checking now takes place in if'  and car function definitions. No restrictions on types in funcTabe' definitions.}
 \begin{lstlisting}
+
 -- functions.hs --
-funcTable' :: [(String, [WVal] -> ThrowsError WVal)] -- inputs a String rather than a FuncDef
-functable = [
-	.
-	.
-	.   
-    ("if", if'), -- No longer need to specify acceptable data types
+funcTable' :: 
+   [(String, [WVal] -> ThrowsError WVal)]
+FuncDef
+functable = [  
+    ("if", if')
     ("car", car)]
 .
 .
 .
-if' :: [WVal] -> ThrowsError WVal -- Exception/error handling via the ThrowsError type
+if' :: [WVal] -> ThrowsError WVal 
 if' ifComps = do
   --error checking
   checkLength (==) 3 ifComps
   checkType TBool $ head ifComps
 
-  --checks that the types of the consequents match
+  --checks that the types 
+  --  of the consequents match
   if getType t == getType f
   then return $ List $ tail ifComps
-  else throwError $ TypeError "expected types to match, found" $ List $ tail ifComps
+  else throwError $ TypeError 
+       "expected types to match, 
+        found" $ List $ tail ifComps
 
   --does the actual if computation
-  if unpackBool cond then return t else return f
+  if unpackBool cond 
+     then return t 
+     else return f
 
   where cond = head ifComps
         t    = ifComps !! 1
@@ -275,11 +270,13 @@ if' ifComps = do
 .
 car :: [WVal] -> ThrowsError WVal
 car [List (x : _)] = return x
-car [badArg]       = throwError $ TypeError "pair" badArg
-car badArgList     = throwError $ NumArgs 1 badArgList
+car [badArg]       = 
+     throwError $ TypeError "pair" badArg
+car badArgList     = 
+     throwError $ NumArgs 1 badArgList
 
 \end{lstlisting} 
-
+\end{figure}
 
 \subsection{Getting Wrangell to Read in csv Files}
 We used existing open source code from data.csv \cite{dataCSV} to read in and parse the csv data files.
