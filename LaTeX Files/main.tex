@@ -179,10 +179,6 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,
 \end{enumerate}
 \twocolumn
 
-
-
-Big step semantics for our functions in Wrangell:
-
 \section{Implementation and Results}
 We ran into several challenges when writing our Wrangell code in Haskell. Most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. 
 
@@ -222,55 +218,26 @@ We describe monads and IO further in ‘Related Work’ below.
 \subsection{Type System Flexibility}
 The second challenge was creating a type system which was flexible enough to achieve our desired level of expressiveness while still behaving within the confines of Haskell’s type system. This issue is illustrated in funcTable below:
 
+… our solution was type-safe exception handling … this is handled in the Either monad (Type-safe error checking). 
+
+\subsection{Getting Wrangell to Read in csv Files}
+We used existing open source code from data.csv \cite{dataCSV} to read in and parse the csv data files.
 
 
+\section{Related Work}
 
-… our solution was type-safe exception handling … this is handled in the Either monad. 
-
-\subsection{Getting Wrangell to read in files}
-
-\subsection{Data.csv} 
-
-
-
-We used data.csv (https://github.com/jgoerzen/missingh/blob/master/src/Data/CSV.hs) to read in and parse the data files. 
 
 Monads 
 
 Monad transformers
 
-
-Type-safe error checking
-
-
-We created our own parser in Haskell... 
-One of our biggest challenges was to improve our level of Haskell coding expertise...
-
-Getting Wrangell to read in files:
-
-What Wrangell can do:
-
-
-Lenses: 
-
-\section{Related Work}
-
+The IO monad (IORef)
 
 Application to other file formats (hdf5)
 
-Our research centered on learning Haskell and finding ways to generate desired behaviors. 
-
-The most challenging concept for us was Monad Transformations. 
- 
+data.csv
 
 
-We researched current data-wrangling tools, and found ().
-Tool1()
-Tool2()
-...The benefits of Wrangell over these tools is (speed?) . 
-
-
-Data wrangling likes functional programming because functional programming is all about input transformation and output. 
 
 \section{Conclusions}
 Wrangell 
@@ -279,6 +246,6 @@ Wrangell
 Hypothetical future improvements of Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). Additionally, it would also be useful if Wrangell could handle files with inconsistent ordering of columns. Finally, we would want Wangell to be able to handle data tables with an unknown number of columns. 
 
 
-\section{References}
 
+\bibliography{main}
 \end{document}
