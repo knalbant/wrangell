@@ -88,8 +88,8 @@ A motivating example for Wrangell could be the following: A small business has m
 Because our team memebers only had beginner or intermediate levels of Haskell knowledge, we chose to keep Wrangell's data management operations fairly simple. 
 As a result, Wranagell's application subjects are limited to tables of data wherein columns were separated by either a comma or a user-specified delimiter.
 
-We determined big-step semantics for Wrangell's operations (Figure 1).
-Then we planned to apply Wrangell's data manipulation features to a variety of csv files with a data table formatted per the example in Figure 2.
+We determined big-step semantics for Wrangell's operations (Figure \ref{bigStep}).
+Then we planned to apply Wrangell's data manipulation features to a variety of csv files with a data table formatted per the example in Figure \ref{exampleTable}.
 
 We decided that Wrangell should support the following transformation operations:
 \begin{enumerate}
@@ -136,6 +136,7 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1}',m_{*2}',...,m_{*n}'), (l_1,l_2,..
 \end{equation*}
 $\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,m_{*n}), (l_1,l_2,...,name,...,l_n)\}$
 \end{enumerate}
+\label{bigStep}
 \end{figure}
 \begin{figure}
 \caption{Example of a Wrangell-compatible data table}
@@ -151,17 +152,24 @@ Ben,    48,	M,		Brie sandwich,	USC,				444556666\\
 Hank,   34,	M,		Dominoes,		Prison GED Program,	888116666\\
 Leo,    32,	M,		Raw Hamburger,	Sarah Lawrence,		000996666\\
 Jacoby,  51, M,		Coconuts,		USC,				000997777\\
-Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\		
+Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\	
+\label{exampleTable}	
 \end{figure} 
 \twocolumn
 
 
 \section{Implementation and Results}
-We ran into several challenges when writing our Wrangell code in Haskell. Most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. 
+WE based Wrangell on Scheme.....
+In coding Wrangell, most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. We needed to store and modify table data, a goal which seems to contradict Haskell's `immutable data' requirement. Additionally, we needed to implement a type system which was flexible enough to represent lists for our table columns/rows. Finally, we needed to give Wrangell the ability to read and write csv files.  
 
-\subsection{Modifying Data in an Immutable State}
-Our first challenge was getting Wrangell to store information about the contents of the input file. This conflicts with the idea that a functional language limits its environment to an ``immutable state''. For example, Wrangell would need to store the parsed data table from each input file. Additionally, Wrangell needs to modify the data table. Our solution was to perform operations within the \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions''. This allows us to mimic imperative behavior without requiring mutability of variables.  
-The below example demonstrates our use of the IO monad during construction of an empty data table for later use: 
+\subsection{Modeling Wrangell After Scheme}
+We based Wrangell on Scheme, a Lisp dialect. .....blah blah blah. For more on Scheme see 'Related Work' below. 
+
+
+\subsection{Working with Haskell's Immutable Data}
+In Haskell, data is immutable (see 'Immutable Data and Monads' in `Related Work'). Yet, we needed Wrangell to store and modify information about our original and transformed data tables. Our solution was to define tables using the \emph{data.IORef} package. With this package we constructed our \emph{Table} data type to be an \emph{IORef} of(WAIT WHAT "TODO this will be a bit different"). The code in Figure \ref{tableIORef} demonstrates our use of the IO monad during construction of an empty data table for later use (Later use example in Figure \ref{tableIoRefLaterUse}) . 
+Without defining emptyTable as an IORef, we would have (encountered an error?) during later use. 
+
 \begin{figure}
 \caption{Creation of the `Table' data type within the IO Monad}
 \begin{lstlisting}
@@ -189,20 +197,19 @@ emptyTable = new IORef Table' {
   delimiter = ","
 }
 \end{lstlisting}
+\label{tableIORef}
 \end{figure}
 Because emptyTable is in the IO monad, we can later () as follows:
+\begin{figure}
+\caption{placeholder}
 \begin{lstlisting}
---blah blah blah
+LATER USE OF THE TABLE CONTEXT/INSTANCE?
 \end{lstlisting}
-
-Without defining emptyTable as an IORef, we would have (encountered an error?) above. 
-
-Additionally, Use of the IO Monad via IORef also allows Wrangell to be used to make “helper functions”, ……
-
-We describe monads and IO further in ‘Related Work’ below. 
+\label{tableIoRefLaterUse}
+\end{figure}
 
 \subsection{Type System Flexibility}
-The second challenge was creating a type system which was flexible enough to achieve our desired level of expressiveness while still behaving within the confines of Haskell's type system. We initially defined functions in 'functable' as follows:
+Wrangell needed a type system which was flexible enough to achieve our desired level of expressiveness, particularly when describing lists necessary to represent data table columns/rows. We initially defined type restrictions directly in 'funcTable' (Figure \ref{fig:inflexType}).
 \begin{figure}
 \caption{Inflexible type system: Type-checking occurs in funcTable, no type-checking in `'if' function definition}
 \begin{lstlisting}
@@ -224,13 +231,14 @@ if' [condition, t, f] =
     if unpackBool condition then t else f
 
 \end{lstlisting}
+\label{fig:inflexType}
 \end{figure}
-In this strategy we use funcTable to constrain exactly what inputs a function can accept. However, for the car function (which computes the first item of a list), in order to describe lists of varying length and types, we would have to include a line (an instance of the funcTable? class?) for every possible combination of lengths and types!
+In this strategy we use funcTable to constrain exactly what inputs a function can accept. However, for the \emph{car} function (which computes the first item of a list), in order to describe lists of varying length and types, we would have to include a line (an instance of the funcTable? class?) for every possible combination of lengths and types!
 
-Our solution (Figure 5) was to move the type-checking of inputs into the functions themselves. This allows more flexibility in funcTable. However, because it would now be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution, described in related work, was to implement type-safe exception handling via the Either monad. 
+Our solution (Figure \ref{fig:flexType}) was to move the type-checking of inputs into the functions themselves. This allows more flexibility in funcTable. However, because it would now be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution, described in related work, was to implement type-safe exception handling via the Either monad. 
 
 \begin{figure}
-\caption{type-checking now takes place in if'  and car function definitions. No restrictions on types in funcTabe' definitions.}
+\caption{Flexible type system: Type-checking now takes place in if' and car function definitions. No restrictions on types in funcTabe' definitions.}
 \begin{lstlisting}
 
 -- functions.hs --
@@ -276,21 +284,30 @@ car badArgList     =
      throwError $ NumArgs 1 badArgList
 
 \end{lstlisting} 
+\label{fig:flexType}
 \end{figure}
 
-\subsection{Getting Wrangell to Read in csv Files}
-We used existing open source code from data.csv \cite{dataCSV} to read in and parse the csv data files.
+\subsection{Reading and Writing csv Files}
+For Wrangell's reading, parsing, and writing csv files, we used some existing code from the public GitHub repository MissingH \cite{dataCSV}. Specifically we used CSV.hs, which uses Data.csv to .....
+
+More description of how Wrangell reads in files....  
 
 
 \section{Related Work}
 
+\subsection{Scheme}
+Scheme is a Lisp dialect. It was useful to our construction of Wrangell because...
 
-Monads 
+\subsection{Monads in Haskell}
+Monads were one of the more difficult concepts for us to implement. ...blah blah blah... We used the IO monad to facilitate modification of our data tables.  
 
-Monad transformers
+\subsection{MissingH, Data.csv, CSV.hs}
+MissingH is a publicly available repository of Haskell utility functions. We used CSV.hs to read/write csv files..... CSV.hs works like this: ... 
+
+
 
 The IO monad (IORef)
-
+ \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions''. This allows us to mimic imperative behavior without requiring mutability of variables.  
 Application to other file formats (hdf5)
 
 data.csv
@@ -301,7 +318,7 @@ data.csv
 Wrangell 
 
 
-Hypothetical future improvements of Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). Additionally, it would also be useful if Wrangell could handle files with inconsistent ordering of columns. Finally, we would want Wangell to be able to handle data tables with an unknown number of columns. 
+Hypothetical future improvements to Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). Additionally, it would also be useful if Wrangell could handle files with inconsistent ordering of columns. Finally, we would want Wangell to be able to handle data tables with an unknown number of columns. 
 
 
 
