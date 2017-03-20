@@ -21,7 +21,8 @@ Haskell Parsec parsers for comma-separated value (CSV) files.
 Written by John Goerzen, jgoerzen\@complete.org
 -}
 
-module CSV (csvFile, genCsvFile) where
+--module CSV (csvFile, genCsvFile) where
+module CSV where
 import Text.ParserCombinators.Parsec
 import Data.List (intersperse)
 
@@ -44,7 +45,7 @@ quotedcell = do char '"'
                 return content
 
 line :: Char -> GenParser Char st [String]
-line delim = sepBy cell (char delim)
+line delim = sepBy cell (char ',')
 
 {- | Parse a Comma-Separated Value (CSV) file.  The return value is a list of
 lines; each line is a list of cells; and each cell is a String.

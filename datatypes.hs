@@ -38,6 +38,13 @@ data WError = Parser ParseError
             | NumArgs Integer [WVal]
             | FormatSpec String [WVal]
             | DelimFormat [WVal]
+            | NotImplemented String
+            | UnsupportedFileType String [FileType]
+
+data FileType = CSV
+              | Text
+              | File --placeholder, when initializing the emptytable need to have a value for all fields
+              deriving (Show, Eq)
 
 type Env = IORef [(String, IORef WVal)]
 
@@ -47,7 +54,8 @@ type ThrowsError = Either WError
 
 type FuncDef = (String, [WType])
 
-data Table' = Table' { rows :: [[WVal]], format :: [WType], labels :: [String], delimiter :: String}
+data Table' = Table' { rows :: [[WVal]], format :: [WType],
+                       labels :: [String], delimiter :: String, fileType :: FileType}
 type Table = IORef Table' -- TODO: This will be a bit different
 
 
@@ -64,7 +72,8 @@ emptyTable = newIORef Table' {
   rows   = [[]],
   format = [],
   labels = [],
-  delimiter = ","
+  delimiter = ",",
+  fileType = File
 }
 
 
@@ -158,6 +167,11 @@ showError (FormatSpec message values) = message ++ unwordsList values
 showError (DelimFormat found) =
   "Delimiter specification should be (delimiter \"delims\") got: " ++ unwordsList found
 
+showError (UnsupportedFileType extension fileTypes)
+  = "Unsupported filetype got extension: " ++ extension
+      ++ " currently supporting: " ++ (unwords $ map show fileTypes)
+
+showError (NotImplemented message) = message
 
 trapError :: (MonadError a m, Show a) => m String -> m String
 trapError action = catchError action (return . show)

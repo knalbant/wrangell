@@ -1,3 +1,4 @@
+
 module DataOperations where
 import DataTypes
 import Control.Monad.Except
@@ -21,6 +22,15 @@ typeTable = [
             ("boolean", TBool),
             ("bool", TBool)
             ]
+
+--modify this and parsefile to allow for different filetypes
+fileExtensions :: [(String, FileType)]
+fileExtensions = [
+                 ("csv", CSV)
+                 --("txt", Text)
+                 ]
+
+
 
 checkLengthFormats :: Table' -> [WVal] -> IOThrowsError WVal
 checkLengthFormats table formats
@@ -132,3 +142,17 @@ doTableWrite env table f = do
     let t = f env unwrappedTable
     liftIO $ writeIORef table t
     return Unit
+
+
+parseFile :: Env -> Table -> IOThrowsError WVal
+parseFile env table = return Unit
+
+  --if isNothing $ fileType filename
+--    then throwError $ UnsupportedFileType
+
+
+  where checkFileType filename = if isNothing $ fileType filename fileExtensions
+                                 then throwError $ UnsupportedFileType (fileExtension filename) (map snd fileExtensions)
+                                 else (return Unit :: IOThrowsError WVal)
+        fileType filename = lookup $ fileExtension filename
+        fileExtension = tail . dropWhile (/='.')

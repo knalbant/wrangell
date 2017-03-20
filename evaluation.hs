@@ -36,22 +36,25 @@ eval env _ (List (Atom "lambda" : List params : body)) =
 eval env table (List [Atom "dropColumn", val]) = dropColumn env table val
 
 eval env table (List [Atom "delimiter", String delimiter]) =
-  setDelimiter env table delimiter
+  throwError $ NotImplemented "Delimiters not currently supported"--setDelimiter env table delimiter
 eval env table (List (Atom "delimiter":rest)) =
   throwError $ DelimFormat rest
 
 eval env table (List ((Atom "labels") : labels)) =
   setLabels env table labels
 
-eval env table (List ((Atom "formatTable") : formats)) =
+--as soon as we've read in the format we can being parsing the file
+eval env table (List ((Atom "formatTable") : formats)) = do
       formatTable env table formats
+      result <- parseFile env table
+      return Unit 
 
 eval env table (List (fname : args)) = do --mapM (eval env) args >>= liftThrows . apply func
       func    <- eval env table fname    --get the function
       argVals <- mapM (eval env table) args --get the arguments
       apply table func argVals
 
-eval env table (Seq [])  = return $ List [] --just in case
+eval env table (Seq [])  = return Unit --just in case
 eval env table (Seq [l]) = eval env table l
 eval env table (Seq (c:rest)) = do
   eval env table c
