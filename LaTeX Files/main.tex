@@ -183,9 +183,10 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,
 We ran into several challenges when writing our Wrangell code in Haskell. Most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. 
 
 \subsection{Modifying Information in an Immutable State}
-One challenge was to store information about the contents of the input file. This conflicts with the idea of a functional language’s “immutable states.” For example, Wrangell would need to store the parsed data table from each input file. Additionally, Wrangell needs to modify the data table. Our solution was to perform operations within the \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions’.’ 
+One challenge was to store information about the contents of the input file. This conflicts with the idea that a functional limits its environment to an ``immutable state''. For example, Wrangell would need to store the parsed data table from each input file. Additionally, Wrangell needs to modify the data table. Our solution was to perform operations within the \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions''. This allows us to mimic imperative behavior without requiring mutability of variables.  
 The below example demonstrates our use of the IO monad during construction of an empty data table for later use: 
 \begin{lstlisting}
+-- datatypes.hs --
 import Data.IORef
 data Table' = 
 Table' { rows :: [[WVal]], 
@@ -216,9 +217,69 @@ Additionally, Use of the IO Monad via IORef also allows Wrangell to be used to m
 We describe monads and IO further in ‘Related Work’ below. 
 
 \subsection{Type System Flexibility}
-The second challenge was creating a type system which was flexible enough to achieve our desired level of expressiveness while still behaving within the confines of Haskell’s type system. This issue is illustrated in funcTable below:
+The second challenge was creating a type system which was flexible enough to achieve our desired level of expressiveness while still behaving within the confines of Haskell's type system. We initially defined functions in 'functable' as follows:
+\begin{lstlisting}
+-- functions.hs --
+funcTable :: [(FuncDef, [WVal] -> WVal)] -- what is FuncDef? ()???
+functable = [
+	.
+	.
+	.    
+     (("if", [TBool, TFloat, TFloat]), if'),
+     (("if", [TBool, TBool, TBool]), if'),
+     (("car", [TList [TIntegral,TIntegral,TIntegral]]), car' )]
+     
+     .
+     .
+     .
+     
+     
+     if' :: [WVal] -> WVal
+     if' [condition, t, f] = if unpackBool condition then t else f
 
-… our solution was type-safe exception handling … this is handled in the Either monad (Type-safe error checking). 
+\end{lstlisting}
+In this strategy we use funcTable to constrain exactly what inputs a function can accept. However, for the car function (which computes the first item of a list), in order to describe lists of varying length and types, we would have to include a line (an instance of the funcTable? class?) for every possible combination of lengths and types!
+
+Our solution (below) was to move the constraining of what inputs a function can accept into the functions themselves. This allows more flexibility in funcTable. However, because it woul dnow be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution, described in related work, was to implement type-safe exception handling via the Either monad. 
+\begin{lstlisting}
+-- functions.hs --
+funcTable' :: [(String, [WVal] -> ThrowsError WVal)] -- inputs a String rather than a FuncDef
+functable = [
+	.
+	.
+	.   
+    ("if", if'), -- No longer need to specify acceptable data types
+    ("car", car)]
+.
+.
+.
+if' :: [WVal] -> ThrowsError WVal -- Exception/error handling via the ThrowsError type
+if' ifComps = do
+  --error checking
+  checkLength (==) 3 ifComps
+  checkType TBool $ head ifComps
+
+  --checks that the types of the consequents match
+  if getType t == getType f
+  then return $ List $ tail ifComps
+  else throwError $ TypeError "expected types to match, found" $ List $ tail ifComps
+
+  --does the actual if computation
+  if unpackBool cond then return t else return f
+
+  where cond = head ifComps
+        t    = ifComps !! 1
+        f    = ifComps !! 2
+.
+.
+.
+car :: [WVal] -> ThrowsError WVal
+car [List (x : _)] = return x
+car [badArg]       = throwError $ TypeError "pair" badArg
+car badArgList     = throwError $ NumArgs 1 badArgList
+
+\end{lstlisting} 
+
 
 \subsection{Getting Wrangell to Read in csv Files}
 We used existing open source code from data.csv \cite{dataCSV} to read in and parse the csv data files.
