@@ -237,8 +237,10 @@ In this strategy we use funcTable to constrain exactly what inputs a function ca
 
 Our solution (Figure \ref{fig:flexType}) was to move the type-checking of inputs into the functions themselves. This allows more flexibility in funcTable. However, because it would now be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution, described in related work, was to implement type-safe exception handling via the Either monad. 
 
+Use the EITHER MONAD NOT THE MAYBE MONAD SO THAT WE CAN CARRY ERROR MESSAGES WITH US. 
+
 \begin{figure}
-\caption{Flexible type system: Type-checking now takes place in if' and car function definitions. No restrictions on types in funcTabe' definitions.}
+\caption{Flexible type system: Type-checking now takes place in if' and car function definitions. No restrictions on types in funcTable' definitions.}
 \begin{lstlisting}
 
 -- functions.hs --
@@ -292,6 +294,10 @@ For Wrangell's reading, parsing, and writing csv files, we used some existing co
 
 More description of how Wrangell reads in files....  
 
+\subsection{User-Generated Helper Functions}
+in DataOperations.hs
+Bellz n' Wisslez
+IORef essential. 
 
 \section{Related Work}
 
@@ -299,7 +305,52 @@ More description of how Wrangell reads in files....
 Scheme is a Lisp dialect. It was useful to our construction of Wrangell because...
 
 \subsection{Monads in Haskell}
-Monads were one of the more difficult concepts for us to implement. ...blah blah blah... We used the IO monad to facilitate modification of our data tables.  
+As mentioned above, Wrangell needed to emulate imperative behavior in order to track and modify data. However in a functional language like Haskell, 
+
+\subsection{Data.IORef and the IO Monad}
+The IO Monad allows...
+Essential in runRepl, which .... (Figure \ref{runReplIO})
+
+
+\begin{figure}
+\caption{IO monad used in runRepl, a function which ...()}
+\label{runReplIO}
+\begin{lstlisting}
+-- main.hs --
+runRepl :: IO ()
+runRepl = do
+  binds <- primitiveBindings
+  table <- emptyTable
+  doUntil_ (== "quit")
+   (readPrompt "wrangell>>> ") 
+   (evalAndPrint binds table)
+\end{lstlisting}
+\end{figure} 
+
+\subsection{Type-Safe Exception Handling and the Either (Maybe?) Monad}
+Wrangell's ThrowsError data type exists (?) within the Maybe (Either?) monad  \ref{eitherThrowsError}.
+This is important becuase....
+The either monad lets us string together the actions of..... in constructing the dropColumn operation. 
+\begin{figure}
+\caption{ThrowsError data type constructed within the Either monad. dropColumn uses ThrowsError to ()}
+\label{eitherThrowsError}
+\begin{lstlisting}
+-- datatypes.hs -- 
+type ThrowsError = Either WError
+
+-- DataOperations.hs --
+dropColumn :: 
+  Env -> Table -> WVal 
+  -> IOThrowsError WVal
+dropColumn env table (Integral index) = 
+  return Unit
+dropColumn env table (String label) = 
+  return Unit
+dropColumn env table val =
+ throwError $ TypeError 
+  "Invalid type for dropColumn" val
+\end{lstlisting}
+\end{figure} 
 
 \subsection{MissingH, Data.csv, CSV.hs}
 MissingH is a publicly available repository of Haskell utility functions. We used CSV.hs to read/write csv files..... CSV.hs works like this: ... 
