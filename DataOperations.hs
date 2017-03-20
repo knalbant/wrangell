@@ -32,7 +32,7 @@ checkLengthFormats table formats
       length formats /= length (labels table)
     =
     throwError $
-      FormatSpec "Formats should have the same length as labels: " formats
+      FormatSpec "Formats should have the same length as labels found: " formats
 
   | otherwise = return Unit
 
@@ -46,7 +46,7 @@ checkLengthLabels table labels
       length labels /= length (format table)
     =
     throwError $
-      FormatSpec "Labels should have the same length as formats: " labels
+      FormatSpec "Labels should have the same length as formats found: " labels
 
   | otherwise = return Unit
 
@@ -95,7 +95,7 @@ formatTable env table formats = do
 
 
 setDelimiter :: Env -> Table -> String -> IOThrowsError WVal
-setDelimiter env table delim = 
+setDelimiter env table delim =
     doTableWrite env table (\e t -> t {delimiter = delim})
 
 setLabels :: Env -> Table -> [WVal] -> IOThrowsError WVal

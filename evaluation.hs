@@ -35,9 +35,13 @@ eval env _ (List (Atom "lambda" : List params : body)) =
 
 eval env table (List [Atom "dropColumn", val]) = dropColumn env table val
 
-eval env table (List [Atom "delimiter", String delimiter]) = setDelimiter env table delimiter
+eval env table (List [Atom "delimiter", String delimiter]) =
+  setDelimiter env table delimiter
 eval env table (List (Atom "delimiter":rest)) =
   throwError $ DelimFormat rest
+
+eval env table (List ((Atom "labels") : labels)) =
+  setLabels env table labels
 
 eval env table (List ((Atom "formatTable") : formats)) =
       formatTable env table formats
