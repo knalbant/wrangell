@@ -12,7 +12,7 @@ data WType = TAtom
     | TString
     | TBool
     | TIntegral
-    | TFloat 
+    | TFloat
     | TTop deriving (Show, Eq)  -- Everythign is a subtype of Top
 
 data WVal = Atom String
@@ -27,7 +27,7 @@ data WVal = Atom String
           | IOFunc ([WVal] -> IOThrowsError WVal)
           | Port Handle
           | Top -- Everythign is a subtype of Top
-          | Unit 
+          | Unit
 
 
 data WError = Parser ParseError
@@ -37,6 +37,7 @@ data WError = Parser ParseError
             | TypeError String WVal
             | NumArgs Integer [WVal]
             | FormatSpec String [WVal]
+            | DelimFormat [WVal]
 
 type Env = IORef [(String, IORef WVal)]
 
@@ -154,6 +155,8 @@ showError (NumArgs expected found)      = "Expected " ++ show expected
                                           ++ " args; found values " ++ unwordsList found
 
 showError (FormatSpec message values) = message ++ unwordsList values
+showError (DelimFormat found) =
+  "Delimiter specification should be (delimiter \"delims\") got: " ++ unwordsList found
 
 
 trapError :: (MonadError a m, Show a) => m String -> m String
