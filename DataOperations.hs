@@ -301,6 +301,18 @@ getTableLength table = do
 --}
 
 
+dropIncomplete :: Env -> Table -> IOThrowsError WVal 
+dropIncomplete env table = do
+  (dataTable, _, _) <- getTableStuff table
+
+  let modifiedRows = filter (not . (Top `elem`)) dataTable
+
+  doTableWrite env table (\e t -> t {
+    rows = modifiedRows
+  })
+
+  return Unit
+
 --returns the index at which a label occurs or throws an error otherwise
 getLabelIndex :: Table -> String -> IOThrowsError WVal
 getLabelIndex table label = do

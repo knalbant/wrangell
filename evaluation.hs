@@ -57,6 +57,9 @@ eval env table (List [Atom "transformColumn", Atom label, f]) =
 eval env table (List (Atom "transformColumns" : rest)) =
   checkFormatDefined table >> transformColumnsList env table rest
 
+eval env table (List [Atom "dropIncomplete"]) =
+  checkFormatDefined table >> dropIncomplete env table
+
 eval env table (List [Atom "printTable"]) = do
   unWrappedTable <- liftIO $ fmap rows $readIORef table
 
