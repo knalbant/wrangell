@@ -2,6 +2,7 @@
 module Evaluation where
 import Control.Monad.Except
 import Data.Maybe
+import Data.List
 
 import DataTypes
 import Errors
@@ -53,6 +54,15 @@ eval env table (List [Atom "transformColumn", Integral index, f]) =
 eval env table (List [Atom "transformColumn", Atom label, f]) =
   checkFormatDefined table >> transformColumnLabel env table label f
 
+
+eval env table (List [Atom "printTable"]) = do
+  unWrappedTable <- liftIO $ fmap rows $readIORef table
+
+  let wtf = (++ "\n") . concat . intersperse "\n" . map (unwords . map show)
+
+  liftIO $ putStrLn $ wtf unWrappedTable
+
+  return Unit
 
 
 
