@@ -152,7 +152,8 @@ setLabels env table labels = do
 dropColumn :: Env -> Table -> Integer -> IOThrowsError WVal
 dropColumn env table index = do
 
-  dataTable <- liftIO $ fmap rows $ readIORef table
+  --dataTable <- liftIO $ fmap rows $ readIORef table
+  dataTable <- getDataTable table
 
   let modifiedRows = map (removeAtIndex index) dataTable
 
@@ -160,6 +161,10 @@ dropColumn env table index = do
 
 
   return Unit
+
+getDataTable :: Table -> IOThrowsError [[WVal]]
+getDataTable table = liftIO $ fmap rows $ readIORef table
+
 
 --helper function to remoe a single element from a list
 -- NOTE: must be called with a valid index otherwise bad shit will happen
@@ -261,6 +266,3 @@ writeTable table = do
   let outName = outFileName table'
   let outWriter = fromJust $ lookup outType fileWriters
   outWriter table outName
-
-
-

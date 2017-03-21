@@ -36,7 +36,7 @@ eval env _ (List (Atom "lambda" : List params : body)) =
 
 
 eval env table (List [Atom "dropColumn", Integral index]) =
-  checkFormatDefined table >> dropColumn env table index
+  checkFormatDefined table >> dropColumnIndex env table index
 eval env table (List [Atom "dropColumn", Atom label]) =
   checkFormatDefined table >> dropColumnLabel env table label
 eval env table (List (Atom "dropColumn":rest)) =
