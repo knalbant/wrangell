@@ -149,9 +149,9 @@ Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\
 \begin{enumerate}
 \item Table$\\$
 \begin{equation*}
-\Sigma = \bigcup_{n=1,r=1}^{\infty}  \{M|t_i \in T, m_{*i} \in V(t_i:r),l_i \in \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
+\Sigma = \bigcup_{n=0,r=0}^{\infty}  \{M|t_i \in T, m_{*i} \in V(t_i:r),l_i \in \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
 \end{equation*}
-$\sigma[M] = (t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*n}), (l_1,l_2,...,l_n)$
+$\sigma[M] = (t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*n}), (l_0,l_1,...,l_n)$
 
 \item Drop Column$\\$
 \begin{equation*}
@@ -162,11 +162,11 @@ $\sigma[M] = (t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*n}), (l_1,l_2,...,l_n)$
 \begin{equation*}
 \infer{<dropCol \ i, \sigma> \Downarrow \\
 \sigma ' 
-}{i \in[1,n]}
+}{i \in[0,n]}
 \end{equation*}
 
 
-$\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},t_{i+1},...,t_n),(m_{*1},m_{*2},...,m_{*{i-1}},m_{*{i+1}},...,m_{*n}), (l_1,l_2,...,l_{i-1},l_{i+1},...,l_n)\}$
+$\sigma ' [ M ] = \{(t_0,t_1,...,t_{i-1},t_{i+1},...,t_n),(m_{*0},m_{*1},...,m_{*{i-1}},m_{*{i+1}},...,m_{*n}), (l_0,l_1,...,l_{i-1},l_{i+1},...,l_n)\}$
 
 \item Drop Row$\\$\\
 \begin{equation*}
@@ -174,15 +174,15 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},t_{i+1},...,t_n),(m_{*1},m_{*2},...,m_{
 \sigma ' 
 }{m_{*i}'=\{m_{ji}|<\lambda m_{ji}, \sigma> \Downarrow False\}}
 \end{equation*}
-$\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1}',m_{*2}',...,m_{*n}'), (l_1,l_2,...,l_n)\}$
+$\sigma ' [ M ] = \{(t_0,t_1,...,t_n),(m_{*0}',m_{*1}',...,m_{*n}'), (l_0,l_1,...,l_n)\}$
 
 \item Insert Column$\\$
 \begin{equation*}
 \infer{<insertCol  \ type \ label \ j , \sigma> \Downarrow \\
 \sigma ' 
-}{j \in [1,n+1] \wedge \ label \ \notin \{l_1,l_2,...,l_n\}}
+}{j \in [0,n+1] \wedge \ label \ \notin \{l_1,l_2,...,l_n\}}
 \end{equation*}
-$\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},type,...,t_n),(m_{*1},m_{*2},...,m_{*i-1},m_{*i}...,m_{*n}), (l_1,l_2,...,l_{i-1},label,...,l_n)\}$
+$\sigma ' [ M ] = \{(t_0,t_1,...,t_{i-1},type,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}...,m_{*n}), (l_0,l_1,...,l_{i-1},label,...,l_n)\}$
 
 
 \item Transform Column$\\$
@@ -195,10 +195,10 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},type,...,t_n),(m_{*1},m_{*2},...,m_{*i-
 \begin{equation*}
 \infer{<transformCol \ \lambda \ i, \sigma> \Downarrow \\
 \sigma ' 
-}{i \in [1,n]  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
+}{i \in [0,n]  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
 \end{equation*}
 
-$\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_1,l_2,...,l_n)\}$
+$\sigma ' [ M ] = \{(t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_0,l_1,...,l_n)\}$
 
 \end{enumerate}
 \label{bigStep}
