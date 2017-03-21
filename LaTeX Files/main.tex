@@ -300,23 +300,23 @@ import Data.IORef
 .
 .
 data Table' = 
-Table' { rows :: [[WVal]], 
-         format :: [WType], 
-         labels :: [String], 
-         delimiter :: String}
-type Table = IORef Table' 
--- TODO: This will be a bit different
+  Table' { rows :: [[WVal]], 
+           format :: [WType],
+           labels :: [String],
+           outFileType :: FileType, 
+           outFileName :: String}
+type Table = IORef Table'
 .
 .
 .
 --creates a new empty table context
 emptyTable :: IO Table
-emptyTable = new IORef Table' {    
+emptyTable = newIORef Table' {
   rows   = [[]],
   format = [],
   labels = [],
-  delimiter = ","
-}
+  outFileType = File,
+  outFileName = "" }
 \end{lstlisting}
 \label{tableIORef}
 \end{figure}
@@ -366,9 +366,8 @@ Use the EITHER MONAD NOT THE MAYBE MONAD SO THAT WE CAN CARRY ERROR MESSAGES WIT
 
 -- functions.hs --
 funcTable' :: 
-   [(String, [WVal] -> ThrowsError WVal)]
-FuncDef
-functable = [  
+  [(String, [WVal] -> ThrowsError WVal)]
+funcTable' = [  
     ("if", if')
     ("car", car)]
 .
