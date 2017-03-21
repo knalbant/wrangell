@@ -109,7 +109,7 @@ At present Wrangell supports simple file types for input and output such as csv 
 
 
 \subsection{Semantics of Wrangell}
-We decided that Wrangell should support the following transformation operations:
+We decided that Wrangell should support the following transformation operations (See big-step semantics in Figure \ref{bigStep}):
 \begin{enumerate}
 \item Remove a column
 \item Insert a column
@@ -122,7 +122,7 @@ We decided that Wrangell should support the following transformation operations:
 TODO: add stuff about doing transformations on data
 \end{comment}
 
-We describe the big-step semantics for Wrangell's data transformation operations in Figure \ref{bigStep}.
+
 
 \onecolumn
 
@@ -425,64 +425,24 @@ IORef essential.
 \section{Related Work}
 
 \subsection{Scheme}
-Scheme is a Lisp dialect. It was useful to our construction of Wrangell because...
-\cite{scheme}
+Scheme is a Lisp dialect \cite{scheme}. It was useful to our construction of Wrangell because.....().......
 
 \subsection{Monads in Haskell}
-As mentioned above, Wrangell needed to emulate imperative behavior in order to track and modify data. However in a functional language like Haskell, 
-Monad Transformers \citep{monadTransform}
-
-
-
-
-
-
-\subsection{Data.IORef and the IO Monad}
-
-\subsection{Type-Safe Exception Handling and the Either (Maybe?) Monad}
-Wrangell's ThrowsError data type exists (?) within the Maybe (Either?) monad  \ref{eitherThrowsError}.
-This is important becuase....
-The either monad lets us string together the actions of..... in constructing the dropColumn operation. 
-\begin{figure}
-\caption{ThrowsError data type constructed within the Either monad. dropColumn uses ThrowsError to ()}
-\label{eitherThrowsError}
-\begin{lstlisting}
--- datatypes.hs -- 
-type ThrowsError = Either WError
-
--- DataOperations.hs --
-dropColumn :: 
-  Env -> Table -> WVal 
-  -> IOThrowsError WVal
-dropColumn env table (Integral index) = 
-  return Unit
-dropColumn env table (String label) = 
-  return Unit
-dropColumn env table val =
- throwError $ TypeError 
-  "Invalid type for dropColumn" val
-\end{lstlisting}
-\end{figure} 
+As mentioned above, Wrangell needed to emulate imperative behavior in order to track and modify data. Previous work on monads and monad transformers \citep{monadTransform} was useful in constructing Wrangell's capabilities for data table information modification and error handling.  
 
 \subsection{MissingH, Data.csv, CSV.hs}
-MissingH is a publicly available repository of Haskell utility functions. We used CSV.hs to read/write csv files..... CSV.hs works like this: ... 
-
-
-The IO monad (IORef)
- \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions''. This allows us to mimic imperative behavior without requiring mutability of variables.  
-Application to other file formats (hdf5)
-
-data.csv
+MissingH \cite{dataCSV} is a publicly available repository of Haskell utility functions. We used CSV.hs to read/write csv files..... CSV.hs works like this: ... 
 
 \subsection{DSLs}
-\cite{DSLs}
-As a Domain Specific Language, Wrangell was intended to be a fast, simple tool to carry out data management tasks. Paul Hudak's paper on Domain Specific Languages champions the usefulness of program written in DSL's because of these exact qualities \cite{DSLs}. An idea not yet addressed in our discussion of Wrangell is Hudak's point that DSL's are more usable by those without significant programming expertise. blah blah blah 
+As a Domain Specific Language, Wrangell was intended to be a fast, simple tool to carry out data management tasks. Paul Hudak's paper on Domain Specific Languages champions the usefulness of program written in DSL's because of these exact qualities \cite{DSLs}. An idea not yet addressed in our discussion of Wrangell is Hudak's point that DSL's are more usable by those without significant programming expertise. Wrangell could thus be a starting point for a data-wrangling product used in industries where users are less likely to have programming skills. 
 
 
 
 
 \section{Conclusions}
-Wrangell succesfully....().... 
+Wrangell succesfully....().... blah blah blah ....() ...
+.........
+.......
 
 Future improvements to Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). It would also be useful if Wrangell could handle files with inconsistent ordering of columns. Additionally, we would want Wrangell to be able to handle data tables with an unknown number of columns. 
 
