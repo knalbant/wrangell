@@ -94,10 +94,10 @@ genCsvFile :: Char -> [[String]] -> String
 genCsvFile delim inp =
     unlines . map csvline $ inp
     where csvline :: [String] -> String
-          csvline l = concat . intersperse [delim] . map csvcells $ l
-          csvcells :: String -> String
-          csvcells "" = ""
-          csvcells c = '"' : convcell c ++ "\""
+          csvline l = concat $ intersperse [delim] l
+          -- csvcells :: String -> String
+          -- csvcells "" = ""
+          -- csvcells c = '"' : convcell c ++ "\""
           convcell :: String -> String
           convcell c = concatMap convchar c
           convchar '"' = "\"\""

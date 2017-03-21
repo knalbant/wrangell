@@ -7,6 +7,7 @@ import Data.IORef
 import Data.Char
 import Data.Maybe
 import DataParsers
+import DataWriters
 
 allUnique :: (Eq a) => [a] -> Bool
 allUnique [] = True
@@ -37,6 +38,13 @@ fileParsers =
             [
             (CSV, parseCSVDelim ','),
             (TSV, parseCSVDelim '\t')
+            ]
+
+fileWriters :: [(FileType, Table -> String -> IO ())]
+fileWriters =
+            [
+            (CSV, writeCSVDelim ','),
+            (TSV, writeCSVDelim '\t')
             ]
 
 
@@ -189,3 +197,15 @@ parseFile env table = do
 
 getFileType :: String -> Maybe FileType
 getFileType filename = lookup (dropWhile (/='.') filename) fileExtensions
+
+
+writeTable :: Table -> IO ()
+writeTable table = do
+  table' <- readIORef table
+  let outType = outFileType table'
+  let outName = outFileName table'
+  let outWriter = fromJust $ lookup outType fileWriters
+  outWriter table outName
+
+
+

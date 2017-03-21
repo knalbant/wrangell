@@ -146,8 +146,8 @@ unwordsList = unwords . map showVal
 showVal :: WVal -> String
 showVal (Atom atom)     = atom
 showVal (String str)    = str
-showVal (Bool True)     = "#t"
-showVal (Bool False)    = "#f"
+showVal (Bool True)     = "true"
+showVal (Bool False)    = "false"
 showVal (Integral n)    = show n
 showVal (Float f)       = show f
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"

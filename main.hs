@@ -11,6 +11,7 @@ import Evaluation
 import Functions
 import DataTypes
 import Errors
+import DataOperations
 
 
 readOrThrow :: Parser a -> String -> ThrowsError a
@@ -95,6 +96,7 @@ runFile args = do
   env <- bindVars bindings $ [("args", List $ map String wArgs)]
 
   (runIOThrows $ liftM show $ load filename >>= eval env table . Seq) >>= putStrLn
+  writeTable table
 
 
 runRepl :: IO ()
