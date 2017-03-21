@@ -6,7 +6,9 @@ import ArgParsing
 import Data.IORef
 import Data.Char
 import Data.Maybe
+import Data.List
 import CSV
+
 
 allUnique :: (Eq a) => [a] -> Bool
 allUnique [] = True
@@ -134,11 +136,64 @@ setLabels env table labels = do
         atomList2StrList = map unpackAtom
 
 
-dropColumn :: Env -> Table -> WVal -> IOThrowsError WVal
-dropColumn env table (Integral index) = return Unit
-dropColumn env table (String label) = return Unit
-dropColumn env table val = throwError $ TypeError "Invalid type for dropColumn" val
 
+--should in principle be hidden from evaluation.hs
+dropColumn :: Env -> Table -> Integer -> IOThrowsError WVal
+dropColumn env table index = do
+
+  dataTable <- liftIO $ fmap rows $ readIORef table
+
+  let modifiedRows = map (removeAtIndex index) dataTable
+
+  doTableWrite env table (\e t -> t {rows = modifiedRows})
+
+  
+  return Unit
+
+--helper function to remoe a single element from a list
+-- NOTE: must be called with a valid index otherwise bad shit will happen
+removeAtIndex :: Integer -> [a] -> [a]
+removeAtIndex n l = (fst splitList) ++ (drop 1 $ snd splitList)
+  where idx = fromIntegral n
+        splitList = splitAt idx l
+
+dropColumnIndex :: Env -> Table -> Integer -> IOThrowsError WVal
+dropColumnIndex env table index = do
+  checkIndex table index
+  dropColumn env table index
+
+dropColumnLabel :: Env -> Table -> String -> IOThrowsError WVal
+dropColumnLabel env table label = do
+  index <- fmap unpackInteger $ getLabelIndex table label
+  dropColumn env table index
+
+checkIndex :: Table -> Integer -> IOThrowsError WVal
+checkIndex table index = do
+  formatLength <- liftIO $ fmap (toInteger . length . format) $ readIORef table
+
+  if index < 0 || index >= formatLength
+    then throwError $ DataOperationIndex index formatLength
+    else return Unit
+
+{-- might be useful later but for now leave this out
+getTableLength :: Table -> IO Integer
+getTableLength table = do
+  labelList <- fmap labels $ readIORef table
+  return $ toInteger $ length labelList
+--}
+
+
+--returns the index at which a label occurs or throws an error otherwise
+getLabelIndex :: Table -> String -> IOThrowsError WVal
+getLabelIndex table label = do
+  unwrappedTable <- liftIO $ readIORef table
+  let labelList = labels unwrappedTable
+
+  let maybeIndex = fmap (Integral . toInteger) $ elemIndex label labelList
+
+  if isNothing maybeIndex
+    then throwError $ LabelDoesNotExist label
+    else return $ fromJust maybeIndex
 
 
 -- Helper function
@@ -175,7 +230,6 @@ parseFile env table = do
   infileParser table infile
 
   return Unit
-
 
   where checkFileType filename = if isNothing $ getFileType filename
                                  then throwError $ UnsupportedFileType filename (map snd fileExtensions)
