@@ -192,8 +192,9 @@ dropColumnLabel env table label = do
 applyRowFunc :: Env -> Table -> WVal -> Integer -> [WVal] -> IOThrowsError WVal
 applyRowFunc env table f index row = do
   let arg = row !! (fromIntegral index)
-  eval env table (List [f, arg])
-
+  case arg of 
+        Top -> return Top
+        _ -> eval env table (List [f, arg])
 
 updateAtIndex :: Integer -> a -> [a] -> [a]
 updateAtIndex n a l = (fst splitList) ++ (a:(drop 1 $ snd splitList))
