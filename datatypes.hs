@@ -41,6 +41,10 @@ data WError = Parser ParseError
             | NotImplemented String
             | UnsupportedFileType String [FileType]
             | CommandLineArgs
+            | FormatNotDefined
+            | TableOperation String String [WVal] --error when calling table transformation function
+            | LabelDoesNotExist String --for calling
+            | DataOperationIndex Integer Integer
             | CSVParseError String
 
 data FileType = CSV
@@ -181,7 +185,20 @@ showError (UnsupportedFileType extension fileTypes)
       ++ " currently supporting: " ++ (unwords $ map show fileTypes)
 showError (CSVParseError err) = "Error parsing CSV: " ++ err
 
+showError (FormatNotDefined) =
+  "Format of the input file must be defined before doing any transformations on the data"
+
 showError (NotImplemented message) = message
+
+showError (TableOperation funcName expectedArgs foundArgs) =
+  unwords [funcName, " expects: ", expectedArgs, " got: ", unwords $ map show foundArgs]
+
+showError (LabelDoesNotExist label) =
+  "The label: " ++ label ++ " does not exist in the label list."
+
+showError (DataOperationIndex index maxIndex) =
+  "Index to data operations must be between 0 and maximum possible range got index: " ++
+  show index ++ " where maximum possible index is numCols: " ++ show (maxIndex - 1)
 
 trapError :: (MonadError a m, Show a) => m String -> m String
 trapError action = catchError action (return . show)

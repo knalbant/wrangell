@@ -85,12 +85,11 @@ A motivating example for Wrangell could be the following: A small business has m
 
 \section{Approach}
 
-Because our team memebers only had beginner or intermediate levels of Haskell knowledge, we chose to keep Wrangell's data management operations fairly simple. 
-As a result, Wranagell's application subjects are limited to tables of data wherein columns were separated by either a comma or a user-specified delimiter.
+\subsection{Wrangell-Compatible Data}
+Because our team members only had beginner or intermediate levels of Haskell knowledge, we chose to keep Wrangell's data management operations fairly simple. 
+As a result, Wrangell's application subjects are limited to tables of data wherein columns are separated by either a comma or a user-specified delimiter. Furthermore, we allow the first row of data in a csv file to be a list of comma-separated labels, one for each column. We require that each column have a \emph{unique} label, to avoid ambiguity in potential future Wrangell features which may seek to identify columns per their labels. We decided to ultimately apply Wrangell to a variety of csv files. See Figure \ref{exampleTable} for an example of a Wrangell-compatible data table. 
 
-We determined big-step semantics for Wrangell's operations (Figure \ref{bigStep}).
-Then we planned to apply Wrangell's data manipulation features to a variety of csv files with a data table formatted per the example in Figure \ref{exampleTable}.
-
+\subsection{Semantics of Wrangell}
 We decided that Wrangell should support the following transformation operations:
 \begin{enumerate}
 \item Remove a column
@@ -99,10 +98,28 @@ We decided that Wrangell should support the following transformation operations:
 \item Insert a row
 \end{enumerate}
 
-Blah blah blah. other stuff about the approach. 
-
+Additionally, we describe the big-step semantics for Wrangell's operations in Figure \ref{bigStep}.
 
 \onecolumn
+
+\begin{figure}
+\caption{Example of a Wrangell-compatible data table}
+Filename: twinPeaksPeople.csv
+\\\\
+Name,   Age,Gender,	Favorite Food,	School,				Social Security Number \\
+Dale,   40,	M,		Coffee,			Dartmouth			111111111\\
+Audrey, 18,	F,		Coffee,			Twin Peaks High,	888888888\\
+Laura,  17,	F,		Cereal,			Twin Peaks High,	000000000\\
+Bobby,  17,	M,		Bacon,			Twin Peaks High,	333333333\\
+Hawk,   34,	M,		Doughnuts,		Brandeis,			111223333\\
+Ben,    48,	M,		Brie sandwich,	USC,				444556666\\
+Hank,   34,	M,		Dominoes,		Prison GED Program,	888116666\\
+Leo,    32,	M,		Raw Hamburger,	Sarah Lawrence,		000996666\\
+Jacoby,  51, M,		Coconuts,		USC,				000997777\\
+Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\	
+\label{exampleTable}	
+\end{figure} 
+
 \begin{figure}
 \caption{Big-step semantics for Wrangell's table manipulation functions}
 \begin{enumerate}
@@ -138,28 +155,80 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,
 \end{enumerate}
 \label{bigStep}
 \end{figure}
-\begin{figure}
-\caption{Example of a Wrangell-compatible data table}
-Filename: twinPeaksPeople.csv
-\\\\
-Name,   Age,Gender,	Favorite Food,	School,				Social Security Number \\
-Dale,   40,	M,		Coffee,			Dartmouth			111111111\\
-Audrey, 18,	F,		Coffee,			Twin Peaks High,	888888888\\
-Laura,  17,	F,		Cereal,			Twin Peaks High,	000000000\\
-Bobby,  17,	M,		Bacon,			Twin Peaks High,	333333333\\
-Hawk,   34,	M,		Doughnuts,		Brandeis,			111223333\\
-Ben,    48,	M,		Brie sandwich,	USC,				444556666\\
-Hank,   34,	M,		Dominoes,		Prison GED Program,	888116666\\
-Leo,    32,	M,		Raw Hamburger,	Sarah Lawrence,		000996666\\
-Jacoby,  51, M,		Coconuts,		USC,				000997777\\
-Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\	
-\label{exampleTable}	
-\end{figure} 
+
 \twocolumn
 
+\subsection{Monads in Haskell}
+One of our biggest challenges in writing Wrangell would be simulating imperative behavior in Haskell.  
+To carry out activities like storing and modifying table data, we would need to use various Haskell \emph{monads}, a `conceptual structure' \cite{gentleMonads} in Haskell which, for our purposes in Wrangell, would allow us to chain together multiple computations (e.g. a sequence of functions, or a passing of the result of one function to another).
+
+In Wrangell, we planned to use the built-in \emph{Either} monad to manage errors such as the passing of the wrong data type to a function. For items in the Either monad, custom behavior can be defined for 2 cases: Left, wherein an error occurred, and Right, wherein the result was successfully parsed. We planned to use this to attach error descriptions for various data types.  
+
+In Figure \ref{eitherThrowError0} , we define the data type `ThrowsError' to be in the Either monad, meaning any variable of type `ThrowsError' will also be within the Either monad. We then use the Either monad Right/Left functionality in the readOrThrow user input-parsing function to define the behaviors in the Left and Right cases.
+
+\begin{figure}
+\begin{lstlisting}
+-- datatypes.hs --
+
+-- Define the ThrowsError to exist 
+--   within the Either monad
+type ThrowsError = Either WError
+.
+.
+.
+
+-- main.hs --
+
+--Left signals error, Right a proper parse
+readOrThrow :: 
+  Parser a -> String -> ThrowsError a
+readOrThrow parser input = 
+  case parse parser "wrangell" input of
+    Left err  -> throwError $ Parser err
+    Right val -> return val 
+
+\end{lstlisting}
+\caption{Wrangell's use of the Either monad to define behavior in successful and unsuccessful cases in the readOrThrow function which parses user input}
+\label{eitherThrowError0}
+\end{figure}
+
+\subsection{The IO Monad, Monad Transformers, and Lifting}
+We planned to use the IO (`input/output') monad to handle user input to Wrangell. The IO monad would be useful in \emph{monad transformers}, wherein we would adapt data types in existing monads to also include input/output functionality. For this purpose, monad transformations would allow us to combine the behaviors of the IO monad with that of, say, error-handling monads into one data type. 
+
+The IOThrowsError data type, for example, was inspired by an example we found in a Haskell tutorial \cite{writeScheme48}. Construction of this data type in Figure \ref{IOThrowsError} uses the monad transformer \emph{ExceptT}. ExceptT incorporates the functionality of the Either monad and facilitates application of error handling to Wrangell errors (WError) in the IO monad. Observe Wrangell construction and sample usage of IOThrowsError in Figure \ref{IOThrowsError}). In checkAllUnique which checks if the column labels provided to Wrangell are unique, we see the use of ThrowError (which exists in the Either error-handling monad) \emph{and} () which exists in the IO monad???... 
+
+Lifting blah blah blah....
+
+
+\begin{figure}
+\begin{lstlisting}
+-- datatypes.hs --
+
+type IOThrowsError = ExceptT WError IO
+.
+.
+.
+
+-- DataOperations.hs --
+checkAllUnique :: 
+  [String] -> [WVal] -> IOThrowsError WVal
+checkAllUnique labels wlabels = 
+  if allUnique labels
+    then return $ Unit 
+    else throwError 
+         $ FormatSpec 
+           "Labels should be all unique: 
+             " wlabels
+
+\end{lstlisting}
+\caption{•}
+\label{IOThrowsError}
+\end{figure}
+
+  
 
 \section{Implementation and Results}
-WE based Wrangell on Scheme.....
+
 In coding Wrangell, most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. We needed to store and modify table data, a goal which seems to contradict Haskell's `immutable data' requirement. Additionally, we needed to implement a type system which was flexible enough to represent lists for our table columns/rows. Finally, we needed to give Wrangell the ability to read and write csv files.  
 
 \subsection{Modeling Wrangell After Scheme}
@@ -303,9 +372,16 @@ IORef essential.
 
 \subsection{Scheme}
 Scheme is a Lisp dialect. It was useful to our construction of Wrangell because...
+\cite{scheme}
 
 \subsection{Monads in Haskell}
 As mentioned above, Wrangell needed to emulate imperative behavior in order to track and modify data. However in a functional language like Haskell, 
+Monad Transformers \citep{monadTransform}
+
+
+
+
+
 
 \subsection{Data.IORef and the IO Monad}
 The IO Monad allows...
@@ -313,7 +389,7 @@ Essential in runRepl, which .... (Figure \ref{runReplIO})
 
 
 \begin{figure}
-\caption{IO monad used in runRepl, a function which ...()}
+\caption{WANT TO GET RID OF THIS. RUNREPL NOT THAT IMPORTANT. IO monad used in runRepl, a function which ...()}
 \label{runReplIO}
 \begin{lstlisting}
 -- main.hs --
@@ -356,20 +432,20 @@ dropColumn env table val =
 MissingH is a publicly available repository of Haskell utility functions. We used CSV.hs to read/write csv files..... CSV.hs works like this: ... 
 
 
-
 The IO monad (IORef)
  \emph{IO Monad}, an abstract data type which provides a system wherein we can build ``composite actions''. This allows us to mimic imperative behavior without requiring mutability of variables.  
 Application to other file formats (hdf5)
 
 data.csv
 
-
+\subsection{DSLs}
+\cite{DSLs}
 
 \section{Conclusions}
 Wrangell 
 
 
-Hypothetical future improvements to Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). Additionally, it would also be useful if Wrangell could handle files with inconsistent ordering of columns. Finally, we would want Wangell to be able to handle data tables with an unknown number of columns. 
+Hypothetical future improvements to Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). Additionally, it would also be useful if Wrangell could handle files with inconsistent ordering of columns. Finally, we would want Wrangell to be able to handle data tables with an unknown number of columns. 
 
 
 
