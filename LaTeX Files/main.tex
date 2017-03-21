@@ -116,6 +116,7 @@ We decided that Wrangell should support the following transformation operations:
 \item Insert a column
 \item Remove a row
 \item Insert a row
+\item Run transformations on individual columns of data
 \end{enumerate}
 
 \begin{comment}
@@ -149,16 +150,23 @@ Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\
 \begin{enumerate}
 \item Table$\\$
 \begin{equation*}
-\Sigma = \bigcup_{n=1,r=1}^{\infty}  \{M|t_i \epsilon T, m_{*i} \epsilon V(t_i:r),l_i \epsilon \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
+\Sigma = \bigcup_{n=1,r=1}^{\infty}  \{M|t_i \in T, m_{*i} \in V(t_i:r),l_i \in \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
 \end{equation*}
 $\sigma[M] = (t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*n}), (l_1,l_2,...,l_n)$
 
 \item Drop Column$\\$
 \begin{equation*}
-\infer{<dropCol \ name, \sigma> \Downarrow \\
+\infer{<dropCol \ label, \sigma> \Downarrow \\
 \sigma ' 
-}{<name,\sigma> \Downarrow l_i}
+}{<label,\sigma> \Downarrow l_i}
 \end{equation*}
+\begin{equation*}
+\infer{<dropCol \ i, \sigma> \Downarrow \\
+\sigma ' 
+}{i \in[1,n]}
+\end{equation*}
+
+
 $\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},t_{i+1},...,t_n),(m_{*1},m_{*2},...,m_{*{i-1}},m_{*{i+1}},...,m_{*n}), (l_1,l_2,...,l_{i-1},l_{i+1},...,l_n)\}$
 
 \item Drop Row$\\$\\
@@ -171,11 +179,28 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1}',m_{*2}',...,m_{*n}'), (l_1,l_2,..
 
 \item Insert Column$\\$
 \begin{equation*}
-\infer{<insertCol  \ type \ name \ j , \sigma> \Downarrow \\
+\infer{<insertCol  \ type \ label \ j , \sigma> \Downarrow \\
 \sigma ' 
-}{j \epsilon [1,n+1], \ name \ \epsilon \{l_1,l_2,...,l_n\}}
+}{j \in [1,n+1] \wedge \ label \ \notin \{l_1,l_2,...,l_n\}}
 \end{equation*}
-$\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,m_{*n}), (l_1,l_2,...,name,...,l_n)\}$
+$\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},type,...,t_n),(m_{*1},m_{*2},...,m_{*i-1},m_{*i}...,m_{*n}), (l_1,l_2,...,l_{i-1},label,...,l_n)\}$
+
+
+\item Transform Column$\\$
+\begin{equation*}
+\infer{<transformCol \ \lambda \ label, \sigma> \Downarrow \\
+\sigma ' 
+}{<label,\sigma> \Downarrow l_i  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
+\end{equation*}
+
+\begin{equation*}
+\infer{<transformCol \ \lambda \ i, \sigma> \Downarrow \\
+\sigma ' 
+}{i \in [1,n]  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
+\end{equation*}
+
+$\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_1,l_2,...,l_n)\}$
+
 \end{enumerate}
 \label{bigStep}
 \end{figure}
