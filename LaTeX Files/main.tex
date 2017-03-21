@@ -69,18 +69,18 @@ We based Wrangell on Scheme, a Lisp-like language known for its simplicity. Wran
 \section{Introduction}
 For our project, we wanted to design and implement a small language. Haskell was an attractive tool because of its type system in which data types are immutable and are defined algebraically. Furthermore, our team members had either a beginner or intermediate level of Haskell knowledge, so we saw this as an opportunity to learn something new. 
 
-To keep the scope of our language's features manageable, we chose to gear our it to a specific domain. Because Haskell is a functional language, we thought that \emph{data-wrangling}, with its emphasis on data transformations, would be a good application for our language implemented in Haskell. We began creating Wrangell, a DSL for ``WRANGling'' data via ``haskELL''.  
+To keep the scope of our language's features manageable, we chose to gear it to a specific domain. Because Haskell is a functional language, we thought that \emph{data-wrangling}, with its emphasis on data transformations, would be a good application for our language implemented in Haskell. Our resulting projectm, Wrangell, is a DSL for ``WRANGling'' data via ``haskELL''.  
 
-We focused our desired data-wrangling tasks on one format: a table of data in a csv file, wherein we recognize rows via lines of the file, and columns per a user-specified delimiter. The following operations would initially be included in Wrangell:
+We focused our desired data-wrangling tasks on one format: a table of data in a csv file, wherein we recognize rows via lines of the file, and columns per a user-specified delimiter. The following operations were to be supported by Wrangell:
 
 \begin{enumerate}
-\item Read in an input filename, output filename, () , ()
+\item Read in an input filename, output filename
 \item Read in and parse a csv file per a filename 
 \item Run some transformation on the data in the file
 \item Write the transformed data to an output file
 \end{enumerate}
 
-A motivating example for Wrangell could be the following: A small business has many csv files (say, one for each year the company has been active) with customer data. Each file has a column for various items including the customer's name, address, phone number, and credit card number. Now say the business wanted to contract some advertising company to mail a promotional catalog to each of its customers. In this case, the business would want to share its customer database with the advertising company. However, sharing customer credit card information with the advertising company would be both unnecessary and dangerous. In this case,  the business would want an easy way to make copies of the customer information files with the credit card information column removed.   
+A motivating example for Wrangell could be the following: A small business has many csv files (say, one for each year the company has been active) with customer data. Each file has a column for various items including the customer's name, address, phone number, and credit card number. Now say the business wanted to contract some advertising company to mail a promotional catalog to each of its customers. In this case, the business would want to share its customer database with the advertising company. However, sharing customer credit card information with the advertising company would be both unnecessary and dangerous. In this case,  the business would want an easy way to make copies of the customer information files with the credit card information column removed. Such a transformation should be supported by Wrangell.    
 
 
 \section{Approach}
@@ -98,7 +98,7 @@ We decided that Wrangell should support the following transformation operations:
 \item Insert a row
 \end{enumerate}
 
-Additionally, we describe the big-step semantics for Wrangell's operations in Figure \ref{bigStep}.
+We describe the big-step semantics for Wrangell's data transformation operations in Figure \ref{bigStep}.
 
 \onecolumn
 
@@ -164,7 +164,7 @@ To carry out activities like storing and modifying table data, we would need to 
 
 In Wrangell, we planned to use the built-in \emph{Either} monad to manage errors such as the passing of the wrong data type to a function. For items in the Either monad, custom behavior can be defined for 2 cases: Left, wherein an error occurred, and Right, wherein the result was successfully parsed. We planned to use this to attach error descriptions for various data types.  
 
-In Figure \ref{eitherThrowError0} , we define the data type `ThrowsError' to be in the Either monad, meaning any variable of type `ThrowsError' will also be within the Either monad. We then use the Either monad Right/Left functionality in the readOrThrow user input-parsing function to define the behaviors in the Left and Right cases.
+In Figure \ref{eitherThrowError0} , we define the data type `ThrowsError' to be in the Either monad, meaning any variable of type `ThrowsError' will also be within the Either monad. We then use the Either monad Right/Left functionality in the readOrThrow user input-parsing function to define the behaviors in the Left and Right cases (also in Figure \ref{eitherThrowError0}).
 
 \begin{figure}
 \begin{lstlisting}
@@ -193,12 +193,11 @@ readOrThrow parser input =
 \end{figure}
 
 \subsection{The IO Monad, Monad Transformers, and Lifting}
-We planned to use the IO (`input/output') monad to handle user input to Wrangell. The IO monad would be useful in \emph{monad transformers}, wherein we would adapt data types in existing monads to also include input/output functionality. For this purpose, monad transformations would allow us to combine the behaviors of the IO monad with that of, say, error-handling monads into one data type. 
+We planned to use the IO (`input/output') monad to handle user input to Wrangell. The IO monad would be useful in \emph{monad transformers} \cite{monadTransform}, wherein we would adapt data types in existing monads to also include input/output-related functionality. For this purpose, monad transformers would allow us to combine the behaviors of the IO monad with that of, say, error-handling monads into one data type. 
 
-The IOThrowsError data type, for example, was inspired by an example we found in a Haskell tutorial \cite{writeScheme48}. Construction of this data type in Figure \ref{IOThrowsError} uses the monad transformer \emph{ExceptT}. ExceptT incorporates the functionality of the Either monad and facilitates application of error handling to Wrangell errors (WError) in the IO monad. Observe Wrangell construction and sample usage of IOThrowsError in Figure \ref{IOThrowsError}). In checkAllUnique which checks if the column labels provided to Wrangell are unique, we see the use of ThrowError (which exists in the Either error-handling monad) \emph{and} () which exists in the IO monad???... 
+The IOThrowsError data type, for example, was inspired by an example we found in a Haskell tutorial \cite{writeScheme48}. Construction of the IOThrowsError data type in Figure \ref{IOThrowsError} uses the monad transformer \emph{ExceptT}. ExceptT incorporates the functionality of the Either monad and facilitates application of error handling to Wrangell errors (WError) in the IO monad. For example, Firuge \ref{IOThrowsError} also illustrates sample usage of IOThrowsError in the checkAllUnique function. checkAllUnique, which checks if the column labels provided to Wrangell are unique, uses ThrowError (which exists in the Either error-handling monad) \emph{and} .......()..... which exists in the IO monad. This is useful for.......()......
 
-Lifting blah blah blah....
-
+We also planned to use \emph{lifting} in Wrangell. For our purposes, lifting would be useful for............()..............
 
 \begin{figure}
 \begin{lstlisting}
@@ -221,7 +220,7 @@ checkAllUnique labels wlabels =
              " wlabels
 
 \end{lstlisting}
-\caption{•}
+\caption{IOThrowsError data type created via the ExceptT monad transformer. IOThrowsError later used in checkAllUnique which depends on functionality from both the Either and the IO monad.}
 \label{IOThrowsError}
 \end{figure}
 
@@ -268,7 +267,7 @@ emptyTable = new IORef Table' {
 \end{lstlisting}
 \label{tableIORef}
 \end{figure}
-Because emptyTable is in the IO monad, we can later () as follows:
+Because emptyTable is in the IO monad, we can later () as follows (Figure \ref{tableIoRefLaterUse}:
 \begin{figure}
 \caption{placeholder}
 \begin{lstlisting}
@@ -359,7 +358,9 @@ car badArgList     =
 \end{figure}
 
 \subsection{Reading and Writing csv Files}
-For Wrangell's reading, parsing, and writing csv files, we used some existing code from the public GitHub repository MissingH \cite{dataCSV}. Specifically we used CSV.hs, which uses Data.csv to .....
+For Wrangell's reading, parsing, and writing csv files, we used  existing code from the public GitHub repository MissingH \cite{dataCSV}. Specifically we used CSV.hs, which uses Data.csv to parse comma-separated strings into lists of strings. 
+
+To support potential extension of Wrangell we wrote code which converts input file formats to an intermediate Wrangell table. Additionally we wrote code to convert from the intermediate Wrangell table to an output file format. Because Wrangell's data transformations operate on the intermediate table, this allows Wrangell to be applicable to a variety of file formats. This means that, hypothetically, a future iteration of Wrangell could read in a csv file, and output, say, a txt file. 
 
 More description of how Wrangell reads in files....  
 
@@ -384,24 +385,6 @@ Monad Transformers \citep{monadTransform}
 
 
 \subsection{Data.IORef and the IO Monad}
-The IO Monad allows...
-Essential in runRepl, which .... (Figure \ref{runReplIO})
-
-
-\begin{figure}
-\caption{WANT TO GET RID OF THIS. RUNREPL NOT THAT IMPORTANT. IO monad used in runRepl, a function which ...()}
-\label{runReplIO}
-\begin{lstlisting}
--- main.hs --
-runRepl :: IO ()
-runRepl = do
-  binds <- primitiveBindings
-  table <- emptyTable
-  doUntil_ (== "quit")
-   (readPrompt "wrangell>>> ") 
-   (evalAndPrint binds table)
-\end{lstlisting}
-\end{figure} 
 
 \subsection{Type-Safe Exception Handling and the Either (Maybe?) Monad}
 Wrangell's ThrowsError data type exists (?) within the Maybe (Either?) monad  \ref{eitherThrowsError}.
@@ -442,9 +425,6 @@ data.csv
 \cite{DSLs}
 
 \section{Conclusions}
-Wrangell 
-
-
 Hypothetical future improvements to Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). Additionally, it would also be useful if Wrangell could handle files with inconsistent ordering of columns. Finally, we would want Wrangell to be able to handle data tables with an unknown number of columns. 
 
 
