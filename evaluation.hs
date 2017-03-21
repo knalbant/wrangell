@@ -86,7 +86,8 @@ eval env table (List [Atom "outputFile", String outFile]) =
     let argList = unpackList args
     if length argList == 2
       then throwError $ NotImplemented "outPut file function not supported in script mode"
-      else do outFileHelp 0 argList env table
+      else do
+              outFileHelp outFile env table
               liftIO $ writeTable table
               return Unit
 

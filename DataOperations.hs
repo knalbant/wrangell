@@ -343,7 +343,7 @@ parseFile env table = do
   let argList = unpackList args
 
   case length argList of 1 -> inFileHelp env table
-                         2 -> inFileHelp env table >> outFileHelp 1 argList env table
+                         2 -> inFileHelp env table >> outFileHelp (unpackString $ argList !! 1) env table
                          _ -> throwError CommandLineArgs
 
   --let infile  = unpackString $ argList !! 0
@@ -363,12 +363,12 @@ parseFile env table = do
 
   --return Unit
 
-outFileHelp outIdx argList env table = do
-                      let outfile = unpackString $ argList !! outIdx
-                      let outFileType = fromJust $ getFileType outfile
-                      checkFileType outfile --check that the output file is a supported file type
+outFileHelp outFile env table = do
+                      --let outfile = unpackString $ argList !! outIdx
+                      let outFileType = fromJust $ getFileType outFile
+                      checkFileType outFile --check that the output file is a supported file type
                       doTableWrite env table (\e t -> t {outFileType = outFileType})
-                      doTableWrite env table (\e t -> t {outFileName = outfile})
+                      doTableWrite env table (\e t -> t {outFileName = outFile})
                       return Unit
 
 
