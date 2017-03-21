@@ -5,7 +5,8 @@ then
 	cd ..
 fi
 
-make
+make || { echo 'Build failed!' ; exit 1; }
+
 cd Tests
 for path in ./*; do
 	[ -d "${path}" ] || continue # if not a directory, skip
@@ -25,6 +26,8 @@ for path in ./*; do
    	then
     	cat /tmp/thediff
    	fi
+
+   	rm $outPath
 
 
 done
