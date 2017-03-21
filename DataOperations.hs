@@ -165,8 +165,12 @@ parseFile env table = do
   checkFileType infile  --check that the input file is a supported file type
   checkFileType outfile --check that the output file is a supported file type
 
+  let outFileType = fromJust $ getFileType outfile
 
   let infileParser = fromJust $ lookup (fromJust $ getFileType infile) fileParsers
+
+  doTableWrite env table (\e t -> t {outFileType = outFileType})
+  doTableWrite env table (\e t -> t {outFileName = outfile})
 
   infileParser table infile
 
