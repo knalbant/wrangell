@@ -23,6 +23,7 @@
 \usepackage{natbib-cite}
 \usepackage{natbib-acm}
 \usepackage{mathtools}
+\usepackage{verbatim}
 \usepackage{float}
 \floatstyle{boxed} 
 \restylefloat{figure}
@@ -42,8 +43,7 @@
 
 \begin{document}%
 
-%\title{Wrangell: A Data-Wrangling DSL in Haskell}
-\title{God Damn Monads: Dropping the Mic on Wrangell}
+\title{Wrangell: A Data-Wrangling DSL in Haskell}
 
 \author{Dana Iltis}
 \author{Kenan Nalbant}
@@ -55,11 +55,16 @@
 \maketitle
 
 \begin{abstract}
-Managing data from various document types (e.g. txt, csv files) often requires manual work by a user. We present Wrangell, a domain-specific language for common data manipulation tasks.
+Managing and pre-processing data from various types of documents (e.g. txt, csv files) often requires manual work by a user. We present Wrangell, a domain-specific language for common data manipulation tasks.
 
+\begin{comment}
 Run from the command line, Wrangell is specifically designed to modify tables of data wherein columns are separated by a user-specified delimiter. Wrangell has functions to read in a file, parse the data, run a transformation on the table, and write the modified table to an output file. 
+\end{comment}
 
-We implemented Wrangell in Haskell, a functional programming language. We chose Haskell for its powerful type system which allows a large amount of control over how operations behave when handed various data types. Furthermore, as a functional programming language, Haskell is a good choice for tasks which depend on running transformations on data.
+In its current iteration Wrangell is distributed as a command line tool and is specifically designed for common sorts of data-preprocessing tasks. Wrangell is designed from the ground up to be easily extensible with regard to the kinds of input and output files that may be desired. In addition the syntax Wrangell script is simple yet flexible enough to allow for new transformations on data to be defined as needed by end-users.
+
+
+We implemented an interpreter for Wrangell in Haskell, a functional programming language. We chose Haskell for its powerful type system which allows a large amount of control over how operations behave when handed various data types. Furthermore, as a functional programming language, Haskell is a good choice for tasks which depend on running transformations on data.
 
 We based Wrangell on Scheme, a Lisp-like language known for its simplicity. Wrangell's simplicity is desirable as it would facilitate ease of integration into potential future data management projects.
 
@@ -69,16 +74,25 @@ We based Wrangell on Scheme, a Lisp-like language known for its simplicity. Wran
 \section{Introduction}
 For our project, we wanted to design and implement a small language. Haskell was an attractive tool because of its type system in which data types are immutable and are defined algebraically. Furthermore, our team members had either a beginner or intermediate level of Haskell knowledge, so we saw this as an opportunity to learn something new. 
 
-To keep the scope of our language's features manageable, we chose to gear it to a specific domain. Because Haskell is a functional language, we thought that \emph{data-wrangling}, with its emphasis on data transformations, would be a good application for our language implemented in Haskell. Our resulting projectm, Wrangell, is a DSL for ``WRANGling'' data via ``haskELL''.  
+To keep the scope of our language's features manageable, we chose to gear it to a specific domain. Because Haskell is a functional language, we thought that \emph{data-wrangling}, with its emphasis on data transformations, would be a good application for our language implemented in Haskell. Our resulting project, Wrangell, is a DSL for ``WRANGling'' data via ``haskELL''.  
 
 We focused our desired data-wrangling tasks on one format: a table of data in a csv file, wherein we recognize rows via lines of the file, and columns per a user-specified delimiter. The following operations were to be supported by Wrangell:
 
+\begin{comment}
 \begin{enumerate}
 \item Read in an input filename, output filename
 \item Read in and parse a csv file per a filename 
 \item Run some transformation on the data in the file
 \item Write the transformed data to an output file
 \end{enumerate}
+\end{comment}
+
+\begin{enumerate}
+\item Read in an input file and convert to a representation internal to Wrangell
+\item Run some transformation on the internal representation of the data
+\item Write the transformed data to an output file (which can be of a different file type) 
+\end{enumerate}
+
 
 A motivating example for Wrangell could be the following: A small business has many csv files (say, one for each year the company has been active) with customer data. Each file has a column for various items including the customer's name, address, phone number, and credit card number. Now say the business wanted to contract some advertising company to mail a promotional catalog to each of its customers. In this case, the business would want to share its customer database with the advertising company. However, sharing customer credit card information with the advertising company would be both unnecessary and dangerous. In this case,  the business would want an easy way to make copies of the customer information files with the credit card information column removed. Such a transformation should be supported by Wrangell.    
 
@@ -87,7 +101,12 @@ A motivating example for Wrangell could be the following: A small business has m
 
 \subsection{Wrangell-Compatible Data}
 Because our team members only had beginner or intermediate levels of Haskell knowledge, we chose to keep Wrangell's data management operations fairly simple. 
+
+\begin{comment}
 As a result, Wrangell's application subjects are limited to tables of data wherein columns are separated by either a comma or a user-specified delimiter. Furthermore, we allow the first row of data in a csv file to be a list of comma-separated labels, one for each column. We require that each column have a \emph{unique} label, to avoid ambiguity in potential future Wrangell features which may seek to identify columns per their labels. We decided to ultimately apply Wrangell to a variety of csv files. See Figure \ref{exampleTable} for an example of a Wrangell-compatible data table. 
+\end{comment}
+At present Wrangell supports simple file types for input and output such as csv files, or character delimited files however the Wrangell interpreter we wrote in Haskell is equipped such that if another user were to define a function to transform input file types to the intermediate representation and a function to transform from the intermediate representation to the output file format that file format would then be fully supported with no further modifications to the interpreter being necessary.
+
 
 \subsection{Semantics of Wrangell}
 We decided that Wrangell should support the following transformation operations:
@@ -96,7 +115,12 @@ We decided that Wrangell should support the following transformation operations:
 \item Insert a column
 \item Remove a row
 \item Insert a row
+\item Run transformations on individual columns of data
 \end{enumerate}
+
+\begin{comment}
+TODO: add stuff about doing transformations on data
+\end{comment}
 
 We describe the big-step semantics for Wrangell's data transformation operations in Figure \ref{bigStep}.
 
@@ -125,16 +149,23 @@ Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\
 \begin{enumerate}
 \item Table$\\$
 \begin{equation*}
-\Sigma = \bigcup_{n=1,r=1}^{\infty}  \{M|t_i \epsilon T, m_{*i} \epsilon V(t_i:r),l_i \epsilon \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
+\Sigma = \bigcup_{n=1,r=1}^{\infty}  \{M|t_i \in T, m_{*i} \in V(t_i:r),l_i \in \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
 \end{equation*}
 $\sigma[M] = (t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*n}), (l_1,l_2,...,l_n)$
 
 \item Drop Column$\\$
 \begin{equation*}
-\infer{<dropCol \ name, \sigma> \Downarrow \\
+\infer{<dropCol \ label, \sigma> \Downarrow \\
 \sigma ' 
-}{<name,\sigma> \Downarrow l_i}
+}{<label,\sigma> \Downarrow l_i}
 \end{equation*}
+\begin{equation*}
+\infer{<dropCol \ i, \sigma> \Downarrow \\
+\sigma ' 
+}{i \in[1,n]}
+\end{equation*}
+
+
 $\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},t_{i+1},...,t_n),(m_{*1},m_{*2},...,m_{*{i-1}},m_{*{i+1}},...,m_{*n}), (l_1,l_2,...,l_{i-1},l_{i+1},...,l_n)\}$
 
 \item Drop Row$\\$\\
@@ -147,16 +178,38 @@ $\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1}',m_{*2}',...,m_{*n}'), (l_1,l_2,..
 
 \item Insert Column$\\$
 \begin{equation*}
-\infer{<insertCol  \ type \ name \ j , \sigma> \Downarrow \\
+\infer{<insertCol  \ type \ label \ j , \sigma> \Downarrow \\
 \sigma ' 
-}{j \epsilon [1,n+1], \ name \ \epsilon \{l_1,l_2,...,l_n\}}
+}{j \in [1,n+1] \wedge \ label \ \notin \{l_1,l_2,...,l_n\}}
 \end{equation*}
-$\sigma ' [ M ] = \{(t_1,t_2,...,t_{j-1},type,...,t_n),(m_{*1},m_{*2},...0()...,m_{*n}), (l_1,l_2,...,name,...,l_n)\}$
+$\sigma ' [ M ] = \{(t_1,t_2,...,t_{i-1},type,...,t_n),(m_{*1},m_{*2},...,m_{*i-1},m_{*i}...,m_{*n}), (l_1,l_2,...,l_{i-1},label,...,l_n)\}$
+
+
+\item Transform Column$\\$
+\begin{equation*}
+\infer{<transformCol \ \lambda \ label, \sigma> \Downarrow \\
+\sigma ' 
+}{<label,\sigma> \Downarrow l_i  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
+\end{equation*}
+
+\begin{equation*}
+\infer{<transformCol \ \lambda \ i, \sigma> \Downarrow \\
+\sigma ' 
+}{i \in [1,n]  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
+\end{equation*}
+
+$\sigma ' [ M ] = \{(t_1,t_2,...,t_n),(m_{*1},m_{*2},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_1,l_2,...,l_n)\}$
+
 \end{enumerate}
 \label{bigStep}
 \end{figure}
 
 \twocolumn
+
+\begin{comment}
+TODO: update code segments and big-step semantics and syntax of wrangell
+\end{comment}
+
 
 \subsection{Monads in Haskell}
 One of our biggest challenges in writing Wrangell would be simulating imperative behavior in Haskell.  
