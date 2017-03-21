@@ -87,6 +87,7 @@ emptyTable = newIORef Table' {
 }
 
 
+makeFunc :: Env -> [WVal] -> [WVal] -> IOThrowsError WVal
 makeFunc env params body = return $ Func (map show params) body env
 
 runIOThrows :: IOThrowsError String -> IO String

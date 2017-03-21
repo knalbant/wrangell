@@ -10,7 +10,7 @@ import Data.List
 import CSV
 import DataParsers
 import DataWriters
-
+import {-# SOURCE #-} Evaluation
 
 allUnique :: (Eq a) => [a] -> Bool
 allUnique [] = True
@@ -186,6 +186,46 @@ dropColumnLabel :: Env -> Table -> String -> IOThrowsError WVal
 dropColumnLabel env table label = do
   index <- fmap unpackInteger $ getLabelIndex table label
   dropColumn env table index
+
+
+
+applyRowFunc :: Env -> Table -> WVal -> Integer -> [WVal] -> IOThrowsError WVal
+applyRowFunc env table f index row = do
+  let arg = row !! (fromIntegral index)
+  eval env table (List [f, arg])
+
+
+updateAtIndex :: Integer -> a -> [a] -> [a]
+updateAtIndex n a l = (fst splitList) ++ (a:(drop 1 $ snd splitList))
+  where idx = fromIntegral n
+        splitList = splitAt idx l
+
+transformColumn :: Env -> Table -> Integer -> WVal -> IOThrowsError WVal
+transformColumn env table index f = do
+  (dataTable, formats, _) <- getTableStuff table
+
+  newColumnValues <- mapM (applyRowFunc env table f index) dataTable
+  let modifiedRows = map (uncurry $ updateAtIndex index) $ zip newColumnValues dataTable
+
+  let newType = getType $ head newColumnValues
+  let modifiedFormat = updateAtIndex index newType formats
+
+  doTableWrite env table (\e t -> t {
+    rows = modifiedRows, 
+    format = modifiedFormat
+  })
+
+  return Unit
+
+transformColumnIndex :: Env -> Table -> Integer -> WVal -> IOThrowsError WVal
+transformColumnIndex env table index f = do
+  checkIndex table index
+  transformColumn env table index f
+
+transformColumnLabel :: Env -> Table -> String -> WVal -> IOThrowsError WVal
+transformColumnLabel env table label f = do
+  index <- fmap unpackInteger $ getLabelIndex table label
+  transformColumn env table index f
 
 checkIndex :: Table -> Integer -> IOThrowsError WVal
 checkIndex table index = do

@@ -15,3 +15,5 @@ wrangell
 *~
 *.DS_Store
 out.*
+*.hi-boot
+*.o-boot

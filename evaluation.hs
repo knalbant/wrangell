@@ -42,6 +42,12 @@ eval env table (List [Atom "dropColumn", Atom label]) =
 eval env table (List (Atom "dropColumn":rest)) =
   throwError $ TableOperation "dropColumn" "atom|integral" rest
 
+eval env table (List [Atom "transformColumn", Integral index, f]) =
+  checkFormatDefined table >> transformColumnIndex env table index f
+eval env table (List [Atom "transformColumn", Atom label, f]) =
+  checkFormatDefined table >> transformColumnLabel env table label f
+
+
 
 
 eval env table (List [Atom "delimiter", String delimiter]) =
