@@ -26,6 +26,12 @@ eval env table (List [Atom "if", cond, t, f]) = do
     then eval env table t
     else eval env table f
 
+eval env table (List [Atom "print", val]) = do
+  res <- fmap (show) $ eval env table val
+  liftIO $ putStrLn res
+  return Unit
+
+eval env table (List (Atom "print":rest)) = throwError $ NumArgs 1 rest
 
 eval env table (List [Atom "define", Atom var, form]) =
       eval env table form >>= defineVar env var
