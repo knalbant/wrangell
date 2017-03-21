@@ -8,6 +8,7 @@ import Data.Char
 import Data.Maybe
 import Data.List
 import CSV
+import DataParsers
 
 
 allUnique :: (Eq a) => [a] -> Bool
@@ -28,7 +29,8 @@ typeTable = [
 --modify this and parsefile to allow for different filetypes
 fileExtensions :: [(String, FileType)]
 fileExtensions = [
-                 (".csv", CSV)
+                 (".csv", CSV),
+                 (".tsv", TSV)
                  --(".txt", Text)
                  ]
 
@@ -36,7 +38,8 @@ fileExtensions = [
 fileParsers :: [(FileType, Table -> String -> IOThrowsError WVal)]
 fileParsers =
             [
-            --(CSV, parseCSV)
+            (CSV, parseCSVDelim ','),
+            (TSV, parseCSVDelim '\t')
             ]
 
 
@@ -147,7 +150,7 @@ dropColumn env table index = do
 
   doTableWrite env table (\e t -> t {rows = modifiedRows})
 
-  
+
   return Unit
 
 --helper function to remoe a single element from a list

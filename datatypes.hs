@@ -45,9 +45,10 @@ data WError = Parser ParseError
             | TableOperation String String [WVal] --error when calling table transformation function
             | LabelDoesNotExist String --for calling
             | DataOperationIndex Integer Integer
-
+            | CSVParseError String
 
 data FileType = CSV
+              | TSV
               | Text
               | File --placeholder, when initializing the emptytable need to have a value for all fields
               deriving (Show, Eq)
@@ -159,6 +160,7 @@ showVal (Func args body env)
          = "(lambda (" ++ unwords (map show args) ++ ") ...)"
 showVal  (Port  _)      = "<IO Port>"
 showVal (IOFunc _)      = "<IOFunc>"
+showVal (Top)           = "<Top>"
 
 
 showError :: WError -> String
@@ -181,6 +183,7 @@ showError (CommandLineArgs) = "./wrangell [wrangell file] [input file] [outputfi
 showError (UnsupportedFileType extension fileTypes)
   = "Unsupported filetype got file: " ++ extension
       ++ " currently supporting: " ++ (unwords $ map show fileTypes)
+showError (CSVParseError err) = "Error parsing CSV: " ++ err
 
 showError (FormatNotDefined) =
   "Format of the input file must be defined before doing any transformations on the data"
