@@ -161,6 +161,7 @@ showVal (Func args body env)
 showVal  (Port  _)      = "<IO Port>"
 showVal (IOFunc _)      = "<IOFunc>"
 showVal (Top)           = "<Top>"
+showVal (Unit)          = ""
 
 
 showError :: WError -> String
