@@ -26,7 +26,8 @@ typeTable = [
 --modify this and parsefile to allow for different filetypes
 fileExtensions :: [(String, FileType)]
 fileExtensions = [
-                 (".csv", CSV)
+                 (".csv", CSV),
+                 (".tsv", TSV)
                  --(".txt", Text)
                  ]
 
@@ -34,7 +35,8 @@ fileExtensions = [
 fileParsers :: [(FileType, Table -> String -> IOThrowsError WVal)]
 fileParsers =
             [
-            (CSV, parseCSV)
+            (CSV, parseCSVDelim ','),
+            (TSV, parseCSVDelim '\t')
             ]
 
 
