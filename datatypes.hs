@@ -40,6 +40,7 @@ data WError = Parser ParseError
             | DelimFormat [WVal]
             | NotImplemented String
             | UnsupportedFileType String [FileType]
+            | CommandLineArgs
 
 data FileType = CSV
               | Text
@@ -55,7 +56,9 @@ type ThrowsError = Either WError
 type FuncDef = (String, [WType])
 
 data Table' = Table' { rows :: [[WVal]], format :: [WType],
-                       labels :: [String], delimiter :: String, fileType :: FileType}
+                       labels :: [String], delimiter :: String,
+                       outFileType :: FileType, outFileName :: String}
+
 type Table = IORef Table' -- TODO: This will be a bit different
 
 
@@ -73,7 +76,8 @@ emptyTable = newIORef Table' {
   format = [],
   labels = [],
   delimiter = ",",
-  fileType = File
+  outFileType = File,
+  outFileName = ""
 }
 
 
@@ -167,8 +171,10 @@ showError (FormatSpec message values) = message ++ unwordsList values
 showError (DelimFormat found) =
   "Delimiter specification should be (delimiter \"delims\") got: " ++ unwordsList found
 
+showError (CommandLineArgs) = "./wrangell [wrangell file] [input file] [outputfile]"
+
 showError (UnsupportedFileType extension fileTypes)
-  = "Unsupported filetype got extension: " ++ extension
+  = "Unsupported filetype got file: " ++ extension
       ++ " currently supporting: " ++ (unwords $ map show fileTypes)
 
 showError (NotImplemented message) = message

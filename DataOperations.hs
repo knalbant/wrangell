@@ -26,10 +26,16 @@ typeTable = [
 --modify this and parsefile to allow for different filetypes
 fileExtensions :: [(String, FileType)]
 fileExtensions = [
-                 ("csv", CSV)
-                 --("txt", Text)
+                 (".csv", CSV)
+                 --(".txt", Text)
                  ]
 
+--as more filetypes are supported add the parsing functions here
+fileParsers :: [(FileType, Table -> String -> IOThrowsError WVal)]
+fileParsers =
+            [
+            --(CSV, parseCSV)
+            ]
 
 
 checkLengthFormats :: Table' -> [WVal] -> IOThrowsError WVal
@@ -145,14 +151,32 @@ doTableWrite env table f = do
 
 
 parseFile :: Env -> Table -> IOThrowsError WVal
-parseFile env table = return Unit
+parseFile env table = do
 
-  --if isNothing $ fileType filename
---    then throwError $ UnsupportedFileType
+  args <- liftIO $ (readIORef env >>= readIORef . fromJust . lookup "args")
+
+  let argList = unpackList args
+
+  argLengthCheck argList
+
+  let infile  = unpackString $ argList !! 0
+  let outfile = unpackString $ argList !! 1
+
+  checkFileType infile  --check that the input file is a supported file type
+  checkFileType outfile --check that the output file is a supported file type
 
 
-  where checkFileType filename = if isNothing $ fileType filename fileExtensions
-                                 then throwError $ UnsupportedFileType (fileExtension filename) (map snd fileExtensions)
+
+  return Unit
+
+
+  where checkFileType filename = if isNothing $ getFileType filename
+                                 then throwError $ UnsupportedFileType filename (map snd fileExtensions)
                                  else (return Unit :: IOThrowsError WVal)
-        fileType filename = lookup $ fileExtension filename
-        fileExtension = tail . dropWhile (/='.')
+        --fileType filename = lookup $ fileExtension filename
+        --fileExtension = dropWhile (/='.')
+        argLengthCheck args = if length args /= 2 then throwError $ CommandLineArgs
+                                             else (return Unit :: IOThrowsError WVal)
+
+getFileType :: String -> Maybe FileType
+getFileType filename = lookup (dropWhile (/='.') filename) fileExtensions
