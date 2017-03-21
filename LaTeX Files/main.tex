@@ -425,15 +425,13 @@ IORef essential.
 \section{Related Work}
 
 \subsection{Scheme}
-Scheme is a Lisp dialect. It was useful to our construction of Wrangell because...
-\cite{scheme}
+Scheme is a Lisp dialect \cite{scheme}. It was useful to our construction of Wrangell because.....().......
 
 \subsection{Monads in Haskell}
-As mentioned above, Wrangell needed to emulate imperative behavior in order to track and modify data. However in a functional language like Haskell, 
-Monad Transformers \citep{monadTransform}
+As mentioned above, Wrangell needed to emulate imperative behavior in order to track and modify data. Previous work on monads and monad transformers \citep{monadTransform} was useful in constructing Wrangell's capabilities for data table information modification and error handling.  
 
 \subsection{MissingH, Data.csv, CSV.hs}
-MissingH is a publicly available repository of Haskell utility functions. We used CSV.hs to read/write csv files..... CSV.hs works like this: ... 
+MissingH \cite{dataCSV} is a publicly available repository of Haskell utility functions. We used CSV.hs to read/write csv files..... CSV.hs works like this: ... 
 
 \subsection{DSLs}
 As a Domain Specific Language, Wrangell was intended to be a fast, simple tool to carry out data management tasks. Paul Hudak's paper on Domain Specific Languages champions the usefulness of program written in DSL's because of these exact qualities \cite{DSLs}. An idea not yet addressed in our discussion of Wrangell is Hudak's point that DSL's are more usable by those without significant programming expertise. Wrangell could thus be a starting point for a data-wrangling product used in industries where users are less likely to have programming skills. 
