@@ -6,7 +6,7 @@ import ArgParsing
 import Data.IORef
 import Data.Char
 import Data.Maybe
-import CSV
+import DataParsers
 
 allUnique :: (Eq a) => [a] -> Bool
 allUnique [] = True
@@ -34,7 +34,7 @@ fileExtensions = [
 fileParsers :: [(FileType, Table -> String -> IOThrowsError WVal)]
 fileParsers =
             [
-            --(CSV, parseCSV)
+            (CSV, parseCSV)
             ]
 
 

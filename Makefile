@@ -1,4 +1,4 @@
-wrangell : datatypes.hs parser.hs main.hs evaluation.hs errors.hs functions.hs DataOperations.hs ArgParsing.hs CSV.hs
+wrangell : *.hs
 	ghc -o wrangell --make main.hs
 
 clean : 
