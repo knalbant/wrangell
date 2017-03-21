@@ -245,7 +245,7 @@ grabIndices :: Table -> [WVal] -> IOThrowsError [Integer]
 grabIndices table ((Integral i):xs) = do
   rest <- grabIndices table xs
   return $ i : rest
-grabIndices table ((Atom l):xs) = do 
+grabIndices table ((Atom l):xs) = do
   i <- fmap unpackInteger $ getLabelIndex table l
   rest <- grabIndices table xs
   return $ i : rest
@@ -257,8 +257,8 @@ transformColumnsList env table list = do
   let (cols, rest) = break isLambda list
   indices <- grabIndices table cols
 
-  if length rest /= 2 
-    then throwError $ NumArgs 2 rest 
+  if length rest /= 2
+    then throwError $ NumArgs 2 rest
     else return Unit
 
   let f = head rest
@@ -301,7 +301,7 @@ getTableLength table = do
 --}
 
 
-dropIncomplete :: Env -> Table -> IOThrowsError WVal 
+dropIncomplete :: Env -> Table -> IOThrowsError WVal
 dropIncomplete env table = do
   (dataTable, _, _) <- getTableStuff table
 
@@ -342,32 +342,61 @@ parseFile env table = do
 
   let argList = unpackList args
 
-  argLengthCheck argList
+  case length argList of 1 -> inFileHelp env table
+                         2 -> inFileHelp env table >> outFileHelp 1 argList env table
+                         _ -> throwError CommandLineArgs
 
-  let infile  = unpackString $ argList !! 0
-  let outfile = unpackString $ argList !! 1
+  --let infile  = unpackString $ argList !! 0
+  --let outfile = unpackString $ argList !! 1
 
-  checkFileType infile  --check that the input file is a supported file type
-  checkFileType outfile --check that the output file is a supported file type
+  --checkFileType infile  --check that the input file is a supported file type
+  --checkFileType outfile --check that the output file is a supported file type
 
-  let outFileType = fromJust $ getFileType outfile
+  --let outFileType = fromJust $ getFileType outfile
 
+  --let infileParser = fromJust $ lookup (fromJust $ getFileType infile) fileParsers
+
+  --doTableWrite env table (\e t -> t {outFileType = outFileType})
+  --doTableWrite env table (\e t -> t {outFileName = outfile})
+
+  --infileParser table infile
+
+  --return Unit
+
+outFileHelp outIdx argList env table = do
+                      let outfile = unpackString $ argList !! outIdx
+                      let outFileType = fromJust $ getFileType outfile
+                      checkFileType outfile --check that the output file is a supported file type
+                      doTableWrite env table (\e t -> t {outFileType = outFileType})
+                      doTableWrite env table (\e t -> t {outFileName = outfile})
+                      return Unit
+
+
+inFileHelp env table = do
+  args <- liftIO $ (readIORef env >>= readIORef . fromJust . lookup "args")
+  let argList = unpackList args
+  let infile = unpackString $ argList !! 0
+  checkFileType infile
   let infileParser = fromJust $ lookup (fromJust $ getFileType infile) fileParsers
-
-  doTableWrite env table (\e t -> t {outFileType = outFileType})
-  doTableWrite env table (\e t -> t {outFileName = outfile})
-
   infileParser table infile
+
+
+
+parseFileRepl :: Env -> Table -> IOThrowsError WVal
+parseFileRepl env table = do
+  args <- liftIO $ (readIORef env >>= readIORef . fromJust . lookup "args")
+  let argList = unpackList args
 
   return Unit
 
-  where checkFileType filename = if isNothing $ getFileType filename
-                                 then throwError $ UnsupportedFileType filename (map snd fileExtensions)
-                                 else (return Unit :: IOThrowsError WVal)
-        --fileType filename = lookup $ fileExtension filename
-        --fileExtension = dropWhile (/='.')
-        argLengthCheck args = if length args /= 2 then throwError $ CommandLineArgs
-                                             else (return Unit :: IOThrowsError WVal)
+checkFileType :: String -> IOThrowsError WVal
+checkFileType filename = if isNothing $ getFileType filename
+                            then throwError $ UnsupportedFileType filename (map snd fileExtensions)
+                            else return Unit
+
+argLengthCheck :: [WVal] -> Int-> IOThrowsError WVal
+argLengthCheck args n = if length args /= n then throwError $ CommandLineArgs
+                                          else return Unit
 
 getFileType :: String -> Maybe FileType
 getFileType filename = lookup (dropWhile (/='.') filename) fileExtensions

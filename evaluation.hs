@@ -80,6 +80,19 @@ eval env table (List [Atom "delimiter", String delimiter]) =
 eval env table (List (Atom "delimiter":rest)) =
   throwError $ DelimFormat rest
 
+eval env table (List [Atom "outputFile", String outFile]) =
+  do
+    args <- liftIO $ (readIORef env >>= readIORef . fromJust . lookup "args")
+    let argList = unpackList args
+    if length argList == 2
+      then throwError $ NotImplemented "outPut file function not supported in script mode"
+      else do outFileHelp 0 argList env table
+              liftIO $ writeTable table
+              return Unit
+
+eval env table (List (Atom "outputFile":rest)) =
+  throwError $ TableOperation "outPutFile" "string" rest
+
 eval env table (List ((Atom "labels") : labels)) =
   setLabels env table labels
 

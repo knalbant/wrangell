@@ -178,6 +178,7 @@ showVal (IOFunc _)      = "<IOFunc>"
 showVal (Top)           = "<Top>"
 showVal (Unit)          = ""
 
+commandLineErrString = "Usage: ./wrangel [wrangell script] [infile] [outfile]"
 
 showError :: WError -> String
 showError (Parser parseError) = "Parse error at " ++ show parseError
@@ -194,7 +195,8 @@ showError (FormatSpec message values) = message ++ unwordsList values
 showError (DelimFormat found) =
   "Delimiter specification should be (delimiter \"delims\") got: " ++ unwordsList found
 
-showError (CommandLineArgs) = "./wrangell [wrangell file] [input file] [outputfile]"
+--showError (CommandLineArgs) = "./wrangell [wrangell file] [input file] [outputfile]"
+showError (CommandLineArgs) = "Usage: ./wrangel [wrangell script] [infile] [outfile]"
 
 showError (UnsupportedFileType extension fileTypes)
   = "Unsupported filetype got file: " ++ extension

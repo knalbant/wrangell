@@ -86,25 +86,45 @@ load filename = do
 --evalSeq :: IOThrowsError [WVal] -> WVal
 --evalSeq
 
-runFile :: [String] -> IO ()
-runFile args = do
+runFile :: String -> Env -> Table -> IO ()
+runFile filename env table = do
+  {--
   let wArgs = drop 1 args
   let filename = head args
   table <- emptyTable
   bindings <- primitiveBindings
 
   env <- bindVars bindings $ [("args", List $ map String wArgs)]
-
+  --}
   (runIOThrows $ liftM show $ load filename >>= eval env table . Seq) >>= putStrLn
   writeTable table
 
 
-runRepl :: IO ()
-runRepl = do
+runRepl :: Env -> Table -> IO ()
+runRepl env table = do
+  {--
   binds <- primitiveBindings
   table <- emptyTable
-  doUntil_ (== "quit") (readPrompt "wrangell>>> ") (evalAndPrint binds table)
+  --}
+  doUntil_ (== "quit") (readPrompt "wrangell>>> ") (evalAndPrint env table)
 
+--might want a runReplPrimitive where it's just a plain repl
+
+runWrangell :: [String] -> IO ()
+runWrangell args = do
+  let wArgs = if length args == 1 then args else drop 1 args
+  let filename = head args
+  table <- emptyTable
+  bindings <- primitiveBindings
+
+  env <- bindVars bindings $ [("args", List $ map String wArgs)]
+
+  runWrangellHelp filename args env table
+
+  where runWrangellHelp filename args env table
+         | length args == 1 = runRepl env table
+         | length args == 3 = runFile filename env table
+         | otherwise        = error commandLineErrString  --TODO: change to the way in proper CLI tools (defined in datatypes.hs)
 
 main = do args <- getArgs
-          if null args then runRepl else runFile args
+          runWrangell args
