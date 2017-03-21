@@ -75,11 +75,6 @@ eval env table (List [Atom "fold", Integral idx, f, z]) = do
 eval env table (List [Atom "fold", Atom label, f, z]) = do
   checkFormatDefined table >> foldColumnLabel env table label f z
 
-eval env table (List [Atom "delimiter", String delimiter]) =
-  throwError $ NotImplemented "Delimiters not currently supported"--setDelimiter env table delimiter
-eval env table (List (Atom "delimiter":rest)) =
-  throwError $ DelimFormat rest
-
 eval env table (List [Atom "outputFile", String outFile]) =
   do
     args <- liftIO $ (readIORef env >>= readIORef . fromJust . lookup "args")

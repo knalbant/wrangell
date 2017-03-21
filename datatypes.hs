@@ -25,7 +25,6 @@ data WVal = Atom String
           | Seq [WVal]
           | Func { params :: [String], body :: [WVal], closure :: Env }
           | IOFunc ([WVal] -> IOThrowsError WVal)
-          | Port Handle
           | Top -- Everythign is a subtype of Top
           | Unit
 
@@ -38,7 +37,6 @@ instance Eq WVal where
   Float a == Float b            = a == b
   Seq a == Seq b                = a == b
   Func a b c ==  Func d e f     = (a == d) && (b == e) && (c == f)
-  Port a == Port b              = a == b
   Top == Top                    = True
   Unit == Unit                  = True
   _ == _                        = False
@@ -76,10 +74,10 @@ type ThrowsError = Either WError
 type FuncDef = (String, [WType])
 
 data Table' = Table' { rows :: [[WVal]], format :: [WType],
-                       labels :: [String], delimiter :: String,
+                       labels :: [String],
                        outFileType :: FileType, outFileName :: String}
 
-type Table = IORef Table' -- TODO: This will be a bit different
+type Table = IORef Table'
 
 
 instance Show WError where show = showError
@@ -95,7 +93,6 @@ emptyTable = newIORef Table' {
   rows   = [[]],
   format = [],
   labels = [],
-  delimiter = ",",
   outFileType = File,
   outFileName = ""
 }
@@ -173,10 +170,9 @@ showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 showVal (BuiltIn _)     = "<BuiltIn function>"
 showVal (Func args body env)
          = "(lambda (" ++ unwords (map show args) ++ ") ...)"
-showVal  (Port  _)      = "<IO Port>"
 showVal (IOFunc _)      = "<IOFunc>"
-showVal (Top)           = "<Top>"
-showVal (Unit)          = ""
+showVal Top             = "<Top>"
+showVal Unit            = ""
 
 commandLineErrString = "Usage: ./wrangel [wrangell script] [infile] [outfile]"
 
@@ -196,14 +192,14 @@ showError (DelimFormat found) =
   "Delimiter specification should be (delimiter \"delims\") got: " ++ unwordsList found
 
 --showError (CommandLineArgs) = "./wrangell [wrangell file] [input file] [outputfile]"
-showError (CommandLineArgs) = "Usage: ./wrangel [wrangell script] [infile] [outfile]"
+showError CommandLineArgs = "Usage: ./wrangel [wrangell script] [infile] [outfile]"
 
 showError (UnsupportedFileType extension fileTypes)
   = "Unsupported filetype got file: " ++ extension
-      ++ " currently supporting: " ++ (unwords $ map show fileTypes)
+      ++ " currently supporting: " ++ unwords  (map show fileTypes)
 showError (CSVParseError err) = "Error parsing CSV: " ++ err
 
-showError (FormatNotDefined) =
+showError FormatNotDefined =
   "Format of the input file must be defined before doing any transformations on the data"
 
 showError (NotImplemented message) = message

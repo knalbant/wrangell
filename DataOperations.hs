@@ -124,9 +124,9 @@ formatTable env table formats = do
 
 
 
-setDelimiter :: Env -> Table -> String -> IOThrowsError WVal
-setDelimiter env table delim =
-    doTableWrite env table (\e t -> t {delimiter = delim})
+--setDelimiter :: Env -> Table -> String -> IOThrowsError WVal
+--setDelimiter env table delim =
+--    doTableWrite env table (\e t -> t {delimiter = delim})
 
 setLabels :: Env -> Table -> [WVal] -> IOThrowsError WVal
 setLabels env table labels = do

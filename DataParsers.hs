@@ -34,8 +34,8 @@ parseTyped TBool boolStr
     | otherwise                       = Nothing
     where str = map toLower boolStr
 
-parseTyped TIntegral str = fmap (\x -> Integral x) (readMaybeInteger str)
-parseTyped TFloat str = fmap (\x -> Float x) (readMaybeDouble str)
+parseTyped TIntegral str = fmap Integral (readMaybeInteger str)
+parseTyped TFloat str = fmap Float (readMaybeDouble str)
 
 
 
@@ -43,8 +43,8 @@ parseTyped TFloat str = fmap (\x -> Float x) (readMaybeDouble str)
 
 
 parseTypedRow :: [WType] -> [String] -> IOThrowsError [WVal]
-parseTypedRow types rows 
-    | (length types == length rows) = return $ map maybeToTop $ map (uncurry parseTyped) (zip types rows)
+parseTypedRow types rows
+    | (length types == length rows) = return $ map maybeToTop $ zipWith parseTyped types rows --map (uncurry parseTyped) (zip types rows)
     | otherwise = throwError $ CSVParseError $ "Inconsistent number of columns, " ++ show (length types) ++ " vs. " ++ show (length rows)
 
 parseTypedStringTable :: [WType] -> [[String]] -> IOThrowsError [[WVal]]
@@ -54,7 +54,7 @@ parseTypedStringTable types strTable = sequenceA (map (parseTypedRow types) strT
 parseCSVDelim :: Char -> Table -> String -> IOThrowsError WVal
 parseCSVDelim delim table toParseFile = do
     result <- liftIO $ parseFromFile (csvFile delim) toParseFile
-    case result of 
+    case result of
         Left err -> throwError $ CSVParseError (show err)
         Right _ -> return Unit
 
