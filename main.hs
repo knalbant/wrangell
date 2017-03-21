@@ -10,7 +10,6 @@ import Parser
 import Evaluation
 import Functions
 import DataTypes
-import Errors
 import DataOperations
 
 

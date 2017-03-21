@@ -1,3 +1,4 @@
-# wrangell
+# Wrangell - A Data Wrangling DSL Implemented in Haskell
 
-To compile use simply `make`, or `ghc -o wrangell --make main.hs`
+## How to Build
+To compile simply type `make`.

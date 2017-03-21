@@ -5,7 +5,6 @@ import Data.Maybe
 import Data.List
 
 import DataTypes
-import Errors
 import Functions
 import DataOperations
 
