@@ -64,7 +64,11 @@ eval env table (List [Atom "printTable"]) = do
 
   return Unit
 
+eval env table (List [Atom "fold", Integral idx, f, z]) = do
+  checkFormatDefined table >> foldColumnIndex env table idx f z
 
+eval env table (List [Atom "fold", Atom label, f, z]) = do
+  checkFormatDefined table >> foldColumnLabel env table label f z
 
 eval env table (List [Atom "delimiter", String delimiter]) =
   throwError $ NotImplemented "Delimiters not currently supported"--setDelimiter env table delimiter

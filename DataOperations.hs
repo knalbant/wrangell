@@ -10,6 +10,7 @@ import Data.List
 import CSV
 import DataParsers
 import DataWriters
+import Control.Monad
 import {-# SOURCE #-} Evaluation
 
 allUnique :: (Eq a) => [a] -> Bool
@@ -159,8 +160,8 @@ dropColumn env table index = do
   let modifiedLabels = removeAtIndex index labels
 
   doTableWrite env table (\e t -> t {
-    rows = modifiedRows, 
-    format = modifiedFormat, 
+    rows = modifiedRows,
+    format = modifiedFormat,
     labels = modifiedLabels
   })
 
@@ -211,11 +212,16 @@ transformColumn env table index f = do
   let modifiedFormat = updateAtIndex index newType formats
 
   doTableWrite env table (\e t -> t {
-    rows = modifiedRows, 
+    rows = modifiedRows,
     format = modifiedFormat
   })
 
   return Unit
+
+applyBinaryRowFunc :: Env -> Table -> WVal -> Integer -> WVal -> [WVal] -> IOThrowsError WVal
+applyBinaryRowFunc env table f index acc row = do
+  let arg = row !! (fromIntegral index)
+  eval env table (List [f, acc, arg])
 
 transformColumnIndex :: Env -> Table -> Integer -> WVal -> IOThrowsError WVal
 transformColumnIndex env table index f = do
@@ -226,6 +232,24 @@ transformColumnLabel :: Env -> Table -> String -> WVal -> IOThrowsError WVal
 transformColumnLabel env table label f = do
   index <- fmap unpackInteger $ getLabelIndex table label
   transformColumn env table index f
+
+foldColumn :: Env -> Table -> Integer -> WVal -> WVal -> IOThrowsError WVal
+foldColumn env table index f z = do
+  (dataTable, formats, _) <- getTableStuff table
+
+  value <- foldM (applyBinaryRowFunc env table f index) z dataTable
+
+  return value
+
+foldColumnIndex :: Env -> Table -> Integer -> WVal -> WVal -> IOThrowsError WVal
+foldColumnIndex env table index f z = do
+  checkIndex table index
+  foldColumn env table index f z
+
+foldColumnLabel :: Env -> Table -> String -> WVal -> WVal -> IOThrowsError WVal
+foldColumnLabel env table label f z = do
+  index <- fmap unpackInteger $ getLabelIndex table label
+  foldColumn env table index f z
 
 checkIndex :: Table -> Integer -> IOThrowsError WVal
 checkIndex table index = do
