@@ -1,11 +1,10 @@
-(formatTable string string float   float     float float float   float   float)
-(labels      date   time   Pactive Preactive V     I     kitchen laundry hvac)
+(hasHeader)
+(formatTable string string float float float float float float float)
 
 (dropIncomplete)
 
-(dropColumn date)
-(dropColumn time)
-(dropColumn kitchen)
-(dropColumn laundry)
-(dropColumn hvac)
-
+(dropColumn Date)
+(dropColumn Time)
+(dropColumn Sub_metering_1)
+(dropColumn Sub_metering_2)
+(dropColumn Sub_metering_3)

@@ -1,6 +1,6 @@
 module DataParsers where
 import CSV
-import Text.ParserCombinators.Parsec
+import Text.ParserCombinators.Parsec hiding (labels)
 import DataTypes
 import Control.Monad.Except
 import Data.IORef
@@ -62,7 +62,17 @@ parseCSVDelim delim table toParseFile = do
     table' <- liftIO $ readIORef table
     let tableTypes = format table'
 
-    tableValues <- parseTypedStringTable tableTypes tableStrings
-    let newTable' = table' { rows = tableValues }
+    let (tableValueStrings, newLabels) = if hasHeader table'
+        then (tail tableStrings, head tableStrings)
+        else (tableStrings, labels table')
+
+    if (hasHeader table') && length tableTypes /= length newLabels
+        then throwError $ CSVParseError $ "Inconsistent number of columns, " ++ show (length newLabels) ++ " vs. " ++ show (length tableTypes)
+        else return Unit
+
+
+    newRows <- parseTypedStringTable tableTypes tableValueStrings
+
+    let newTable' = table' { rows = newRows, labels = newLabels }
     liftIO $ writeIORef table newTable'
     return Unit

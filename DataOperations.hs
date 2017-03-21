@@ -384,7 +384,7 @@ setHasHeader :: Env -> Table -> IOThrowsError WVal
 setHasHeader env table = do
   rows <- liftIO $ fmap rows $ readIORef table
 
-  if not $ null rows
+  if null rows
     then throwError $ TableOperationOrder "hasHeader" "formatTable"
     else return Unit
 
