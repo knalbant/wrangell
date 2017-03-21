@@ -380,7 +380,17 @@ inFileHelp env table = do
   let infileParser = fromJust $ lookup (fromJust $ getFileType infile) fileParsers
   infileParser table infile
 
+setHasHeader :: Env -> Table -> IOThrowsError WVal
+setHasHeader env table = do
+  rows <- liftIO $ fmap rows $ readIORef table
 
+  if not $ null rows
+    then throwError $ TableOperationOrder "hasHeader" "formatTable"
+    else return Unit
+
+  doTableWrite env table (\e t -> t {hasHeader = True}) 
+
+  return Unit
 
 parseFileRepl :: Env -> Table -> IOThrowsError WVal
 parseFileRepl env table = do

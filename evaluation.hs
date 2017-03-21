@@ -92,6 +92,12 @@ eval env table (List (Atom "outputFile":rest)) =
 eval env table (List ((Atom "labels") : labels)) =
   setLabels env table labels
 
+eval env table (List [Atom "hasHeader"]) = do
+  setHasHeader env table 
+eval env table (List (Atom "hasHeader":rest)) = do
+  throwError $ TableOperation "hasHeader" "" rest
+
+
 --as soon as we've read in the format we can being parsing the file
 eval env table (List ((Atom "formatTable") : formats)) = do
       formatTable env table formats

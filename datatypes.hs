@@ -58,6 +58,7 @@ data WError = Parser ParseError
             | LabelDoesNotExist String --for calling
             | DataOperationIndex Integer Integer
             | CSVParseError String
+            | TableOperationOrder String String
 
 data FileType = CSV
               | TSV
@@ -74,7 +75,7 @@ type ThrowsError = Either WError
 type FuncDef = (String, [WType])
 
 data Table' = Table' { rows :: [[WVal]], format :: [WType],
-                       labels :: [String],
+                       labels :: [String], hasHeader :: Bool,
                        outFileType :: FileType, outFileName :: String}
 
 type Table = IORef Table'
@@ -93,6 +94,7 @@ emptyTable = newIORef Table' {
   rows   = [[]],
   format = [],
   labels = [],
+  hasHeader = False,
   outFileType = File,
   outFileName = ""
 }
@@ -213,6 +215,9 @@ showError (LabelDoesNotExist label) =
 showError (DataOperationIndex index maxIndex) =
   "Index to data operations must be between 0 and maximum possible range got index: " ++
   show index ++ " where maximum possible index is numCols: " ++ show (maxIndex - 1)
+
+showError (TableOperationOrder second first) =
+  second ++ " must be called before: " ++ first
 
 trapError :: (MonadError a m, Show a) => m String -> m String
 trapError action = catchError action (return . show)
