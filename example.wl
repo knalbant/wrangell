@@ -3,10 +3,14 @@
 (formatTable bool int int float)
 (labels isDana age height weight)
 
-(transformColumn age (lambda (a) (* a 2)))
+
+(transformColumns age height (lambda (a h) (* a h)) age)
 
 (define y (factorial 12))
 
 (factorial 12)
 
 (factorial 10)
+
+
+

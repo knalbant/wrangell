@@ -54,6 +54,8 @@ eval env table (List [Atom "transformColumn", Integral index, f]) =
 eval env table (List [Atom "transformColumn", Atom label, f]) =
   checkFormatDefined table >> transformColumnLabel env table label f
 
+eval env table (List (Atom "transformColumns" : rest)) =
+  checkFormatDefined table >> transformColumnsList env table rest
 
 eval env table (List [Atom "printTable"]) = do
   unWrappedTable <- liftIO $ fmap rows $readIORef table

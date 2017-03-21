@@ -189,27 +189,27 @@ dropColumnLabel env table label = do
 
 
 
-applyRowFunc :: Env -> Table -> WVal -> Integer -> [WVal] -> IOThrowsError WVal
-applyRowFunc env table f index row = do
-  let arg = row !! (fromIntegral index)
-  case arg of 
-        Top -> return Top
-        _ -> eval env table (List [f, arg])
+applyRowFunc :: Env -> Table -> WVal -> [WVal] -> IOThrowsError WVal
+applyRowFunc env table f row = do
+  if Top `elem` row then return Top else eval env table (List (f:row))
 
 updateAtIndex :: Integer -> a -> [a] -> [a]
 updateAtIndex n a l = (fst splitList) ++ (a:(drop 1 $ snd splitList))
   where idx = fromIntegral n
         splitList = splitAt idx l
 
-transformColumn :: Env -> Table -> Integer -> WVal -> IOThrowsError WVal
-transformColumn env table index f = do
+getAt :: [Integer] -> [a] -> [a]
+getAt ns l = map ((l !!) . fromIntegral) ns
+
+transformColumns :: Env -> Table -> [Integer] -> Integer -> WVal -> IOThrowsError WVal
+transformColumns env table indices destIndex f = do
   (dataTable, formats, _) <- getTableStuff table
 
-  newColumnValues <- mapM (applyRowFunc env table f index) dataTable
-  let modifiedRows = map (uncurry $ updateAtIndex index) $ zip newColumnValues dataTable
+  newColumnValues <- mapM ((applyRowFunc env table f) . (getAt indices)) dataTable
+  let modifiedRows = map (uncurry $ updateAtIndex destIndex) $ zip newColumnValues dataTable
 
   let newType = getType $ head newColumnValues
-  let modifiedFormat = updateAtIndex index newType formats
+  let modifiedFormat = updateAtIndex destIndex newType formats
 
   doTableWrite env table (\e t -> t {
     rows = modifiedRows, 
@@ -221,12 +221,45 @@ transformColumn env table index f = do
 transformColumnIndex :: Env -> Table -> Integer -> WVal -> IOThrowsError WVal
 transformColumnIndex env table index f = do
   checkIndex table index
-  transformColumn env table index f
+  transformColumns env table [index] index f
+
+
 
 transformColumnLabel :: Env -> Table -> String -> WVal -> IOThrowsError WVal
 transformColumnLabel env table label f = do
   index <- fmap unpackInteger $ getLabelIndex table label
-  transformColumn env table index f
+  transformColumns env table [index] index f
+
+
+isLambda :: WVal -> Bool
+isLambda (List (Atom "lambda" : List params : body)) = True
+isLambda _ = False
+
+grabIndices :: Table -> [WVal] -> IOThrowsError [Integer]
+grabIndices table ((Integral i):xs) = do
+  rest <- grabIndices table xs
+  return $ i : rest
+grabIndices table ((Atom l):xs) = do 
+  i <- fmap unpackInteger $ getLabelIndex table l
+  rest <- grabIndices table xs
+  return $ i : rest
+grabIndices table [] = return []
+
+
+transformColumnsList :: Env -> Table -> [WVal] -> IOThrowsError WVal
+transformColumnsList env table list = do
+  let (cols, rest) = break isLambda list
+  indices <- grabIndices table cols
+
+  if length rest /= 2 
+    then throwError $ NumArgs 2 rest 
+    else return Unit
+
+  let f = head rest
+  destCols <- grabIndices table (tail rest)
+  let destCol = head destCols
+  transformColumns env table indices destCol f
+
 
 checkIndex :: Table -> Integer -> IOThrowsError WVal
 checkIndex table index = do

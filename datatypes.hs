@@ -29,6 +29,20 @@ data WVal = Atom String
           | Top -- Everythign is a subtype of Top
           | Unit
 
+instance Eq WVal where
+  Atom a == Atom b              = a == b
+  List a == List b              = a == b
+  String a == String b          = a == b
+  Bool a == Bool b              = a == b
+  Integral a == Integral b      = a == b
+  Float a == Float b            = a == b
+  Seq a == Seq b                = a == b
+  Func a b c ==  Func d e f     = (a == d) && (b == e) && (c == f)
+  Port a == Port b              = a == b
+  Top == Top                    = True
+  Unit == Unit                  = True
+  _ == _                        = False
+
 
 data WError = Parser ParseError
             | NotFunction String String
