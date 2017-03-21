@@ -152,18 +152,22 @@ setLabels env table labels = do
 dropColumn :: Env -> Table -> Integer -> IOThrowsError WVal
 dropColumn env table index = do
 
-  --dataTable <- liftIO $ fmap rows $ readIORef table
-  dataTable <- getDataTable table
+  (dataTable, formats, labels) <- getTableStuff table
 
   let modifiedRows = map (removeAtIndex index) dataTable
+  let modifiedFormat = removeAtIndex index formats
+  let modifiedLabels = removeAtIndex index labels
 
-  doTableWrite env table (\e t -> t {rows = modifiedRows})
-
+  doTableWrite env table (\e t -> t {
+    rows = modifiedRows, 
+    format = modifiedFormat, 
+    labels = modifiedLabels
+  })
 
   return Unit
 
-getDataTable :: Table -> IOThrowsError [[WVal]]
-getDataTable table = liftIO $ fmap rows $ readIORef table
+getTableStuff :: Table -> IOThrowsError ([[WVal]], [WType], [String])
+getTableStuff table = liftIO $ fmap (\t -> (rows t, format t, labels t)) $ readIORef table
 
 
 --helper function to remoe a single element from a list
