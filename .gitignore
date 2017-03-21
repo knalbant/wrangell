@@ -13,3 +13,5 @@ wrangell
 *.toc
 *.lof
 *~
+*.DS_Store
+out.*
