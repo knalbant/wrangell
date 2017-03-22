@@ -136,67 +136,67 @@ e.g.:
 
 ## Concrete Syntax for Wrangell
 ### Atom String
-...
+```
 Atom :: = ( letter | symbol ) { letter | synmbol | digit }
-...
+```
 ### List [WVal]
-...
+```
 List ::= '(' parseListInternals ')'
-...
+```
 ### String String
-...
+```
 String ::= '"' { escapedChar | - ( '"' | '\' ) } '"'
-...
+```
 ### Bool Bool
-...
+```
 Bool ::= '#' ( 't' | 'f' )
-...
+```
 ### Integral Integer
-...
+```
 Integral ::= digit+
-...
+```
 ### Float Double
-...
+```
 Float ::= digit+ '.' digit+
-...
+```
 ### Seq [WVal]
 ```
 Seq ::= { Expr }
 ```
 ###ListInternals
-...
+```
 ListInternals ::= '' | ( parseExpr { spaces parseExpr} )
-...
+```
 
 ### Expr
-...
+```
 Expr ::= parseString | parseAtom | parseNumber | parseBool | parseQuoted | parseList
-...
+```
 
 ###Number
-...
+```
 Number ::= parseFloat | parseDecimal | parseHex | parseOct | parseBin
-...
+```
 ###Quoted
-...
+```
 Quoted ::= ''' parseExpr
-...
+```
 ###Hex
-...
+```
 Hex ::= '#x' hexDigit+
-...
+```
 ###Oct
-...
+```
 Oct ::= '#o' octDigit+
-...
+```
 ###Bin
-...
+```
 Bin ::= '#b' ( '0' | '1' )+
-...
+```
 
 ###Decimal
-...
+```
 Decimal ::= [ '#d' ] parseIntegral
-...
+```
 
 
