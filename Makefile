@@ -1,5 +1,5 @@
 wrangell : *.hs
-	ghc -o wrangell --make main.hs
+	ghc -o wrangell --make main.hs 
 
 clean : 
 	rm *.o

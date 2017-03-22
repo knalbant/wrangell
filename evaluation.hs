@@ -9,7 +9,7 @@ import Functions
 import DataOperations
 
 import Data.IORef
-
+import GHC.Stack
 
 
 eval :: Env -> Table -> WVal -> IOThrowsError WVal
@@ -37,7 +37,7 @@ eval env table (List [Atom "define", Atom var, form]) =
       eval env table form >>= defineVar env var
 eval env _ (List (Atom "define" : List (Atom var : params) : body)) = do
       makeFunc env params body >>= defineVar env var
-eval env _ (List (Atom "lambda" : List params : body)) =
+eval env _ (List (Atom "lambda" : List params : body)) = 
       makeFunc env params body
 
 
@@ -73,6 +73,33 @@ eval env table (List [Atom "fold", Integral idx, f, z]) = do
 
 eval env table (List [Atom "fold", Atom label, f, z]) = do
   checkFormatDefined table >> foldColumnLabel env table label f z
+
+--fold special cases:
+eval env table (List [Atom "countRows"]) = 
+  eval env table (List [Atom "fold", Integral 0, lam, Float 0])
+  where lam = List [Atom "lambda", 
+                    List [Atom "acc", Atom "rowVal"], 
+                    List [Atom "+", Atom "acc", Float 1]]
+
+eval env table (List [Atom "sum", col]) = 
+  eval env table (List [Atom "fold", col, lam, Float 0])
+  where lam = List [Atom "lambda", 
+                    List [Atom "acc", Atom "rowVal"], 
+                    List [Atom "+", Atom "acc", Atom "rowVal"]]
+
+eval env table (List [Atom "mean", col]) = 
+  eval env table (List [Atom "/", List [Atom "sum", col], List [Atom "countRows"]])
+
+eval env table (List [Atom "variance", col]) = do
+  mean <- eval env table (List [Atom "mean", col])
+  let lam = List [Atom "lambda", 
+                  List [Atom "acc", Atom "rowVal"], 
+                  List [Atom "+", Atom "acc", List[Atom "pow", List[Atom "-", Atom "rowVal", mean], Float 2]]]        
+  varSum <- eval env table (List [Atom "fold", col, lam, Float 0])
+  eval env table (List [Atom "/", varSum, List [Atom "countRows"]])
+
+eval env table (List [Atom "std", col]) = 
+  eval env table (List [Atom "sqrt", List [Atom "variance", col]])
 
 eval env table (List [Atom "outputFile", String outFile]) =
   do
@@ -113,6 +140,7 @@ eval env table (Seq [l]) = eval env table l
 eval env table (Seq (c:rest)) = do
   eval env table c
   eval env table $ Seq rest
+
 
 --gonna need to call this before
 checkFormatDefined :: Table -> IOThrowsError WVal

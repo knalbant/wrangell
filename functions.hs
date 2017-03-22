@@ -163,6 +163,8 @@ funcTable' =
     ("i-", integerBinaryOp (-)),
     ("f-", floatBinaryOp (-)),
     ("fneg", floatUnaryOp (0-)),
+    ("fsqrt", floatUnaryOp sqrt),
+    ("fpow", floatBinaryOp (**)),
     ("i*", integerBinaryOp (*)),
     ("f*", floatBinaryOp (*)),
     ("i/", integerBinaryOp quot),
@@ -199,7 +201,9 @@ funcTable :: [(String, [WVal] -> ThrowsError WVal)]
 funcTable =
     [
     ("neg", numericUnaryOp "neg"),
+    ("sqrt", numericUnaryOp "sqrt"),
 
+    ("pow", numericBinaryOp "pow"),
     ("+", numericBinaryOp "+"),
     ("-", numericBinaryOp "-"),
     ("*", numericBinaryOp "*"),
