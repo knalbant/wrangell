@@ -167,12 +167,10 @@ Seq ::= { Expr }
 ```
 ListInternals ::= '' | ( parseExpr { spaces parseExpr} )
 ```
-
 ### Expr
 ```
 Expr ::= parseString | parseAtom | parseNumber | parseBool | parseQuoted | parseList
 ```
-
 ###Number
 ```
 Number ::= parseFloat | parseDecimal | parseHex | parseOct | parseBin
@@ -193,7 +191,6 @@ Oct ::= '#o' octDigit+
 ```
 Bin ::= '#b' ( '0' | '1' )+
 ```
-
 ###Decimal
 ```
 Decimal ::= [ '#d' ] parseIntegral
