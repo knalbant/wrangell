@@ -4,7 +4,7 @@
 To compile, run `make`.
 To run unit tests, run `Tests/test.sh`.
 
-## A Brief Tour
+# A Brief Tour
 After building, there should be an executable `./wrangell`. Let's look at the syntax of the command line arguments. The command line syntax has two options:
 
 ```bash
@@ -101,7 +101,7 @@ which can then be reused like so:
 ```
 ./wrangell mpg.wl [input.csv] [output.csv]
 ```
-## Overview of provided functionality 
+# Overview of provided functionality 
 Wrangell inherits a great deal of its syntax from Scheme what follows is a brief rundown of what's provided. 
 
 ### Function Definition
@@ -133,8 +133,122 @@ e.g.:
 ```
 (if (< n 100) (* n 2) n)
 ```
-
-## Concrete Syntax for Wrangell
+### Format Table
+To load data in, Wrangell requires explicit types for the columns. Specify this using `formatTable`:
+```
+(formatTable [types])
+```
+e.g.:
+```
+(formatTable int int float string bool
+```
+### Column Labels
+Wrangell supports setting labels for each column using `labels`:
+```
+(labels [names])
+```
+e.g.:
+```
+(labels age SSN height name gender)
+```
+If the input data already has CSV column headers, then instead tell Wrangell to load the labels automatically:
+```
+(hasHeader)
+```
+### Drop Incomplete Rows
+Wrangell provides a convenient way to drop rows which have incomplete, i.e. `<Top>`, data:
+```
+(dropIncomplete)
+```
+### Dropping a Column
+Wrangell supports dropping columns either by column index or by column label:
+```
+(dropColumn index or_label)
+```
+e.g.:
+```
+(dropColumn height)
+```
+### Transforming a Single Column
+To transform a *single* column, provide a function which takes one parameter, and Wrangell whill apply this function over the specified column:
+```
+(transformColumn index_or_label f)
+```
+where `f` can be either a named function or a lambda function. E.g.:
+```
+(transformColumn height (lambda (h) (* 2.0 h)))
+```
+### Transforming on Multiple Columns
+Wrangell also supports transforming a column based on input from multiple columns. Just tell Wrangell which columns the transform is a function of, provide a corresponding function, and a column to write to:
+```
+(transformColumns [input_columns] f output_column)
+```
+e.g.:
+```
+(transformColumns width length (lambda (w l) (* w l)) area)
+```
+### Folding on a Column
+Wrangell supports an operation similar to [fold](https://wiki.haskell.org/Fold) from Haskell: `fold` will compute a cumulative value based on partial computations over the column. The usage is:
+```
+(fold index_or_label f start_value)
+```
+where `f` is a named function or lambda of type `b -> a -> b`. For example, we can compute the sum of a column:
+```
+(fold height (lambda (acc h) (+ acc h)) 0)
+```
+### Counting Rows
+Wrangell can count the rows in the dataset:
+```
+(countRows)
+```
+### Sum a Column
+As shown above, sum can be implemented using `fold`. However, Wrangell supports it for convenience:
+```
+(sum index_or_label)
+```
+e.g.:
+```
+(sum height)
+```
+### Mean of a Column
+```
+(mean index_or_label)
+```
+e.g.:
+```
+(mean height)
+```
+### Variance of a Column
+```
+(variance index_or_label)
+```
+e.g.:
+```
+(variance height)
+```
+### Standard Deviation of a Column
+```
+(std index_or_label)
+```
+e.g.:
+```
+(std height)
+```
+### Printing a Table
+Wrangell allows for convenient printing of a table. This can be very useful in REPL mode to visualize data transformations.
+```
+(printTable)
+```
+### Writing to a File
+Wrangell includes a language feature to write to a file, in addition to using command line arguments to write to a file:
+```
+(outputFile "outputFileName")
+```
+e.g.:
+```
+(outputFile "output.csv")
+```
+# Concrete Syntax for Wrangell
 ```
 Spaces ::= ' ' { ' ' }
 EscapedChar ::= '\' ( '"' | 'n' | 'r' | 't' | '\' )
