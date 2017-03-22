@@ -136,21 +136,30 @@ e.g.:
 
 ## Concrete Syntax for Wrangell
 ```
-Atom :: = ( letter | symbol ) { letter | synmbol | digit }
-List ::= '(' parseListInternals ')'
-String ::= '"' { escapedChar | - ( '"' | '\' ) } '"'
+Spaces ::= ' ' { ' ' }
+EscapedChar ::= '\' ( '"' | 'n' | 'r' | 't' | '\' )
+Letter ::= 'a' | 'b' | ... | 'z' | 'A' | 'B' | ... | 'Z'
+Digit ::= '0' | '1' | ... | '9'
+Symbol ::= '!' | '$' | '%' | '&' | '|' | '*' | '+' | '-' | '/' | ':' | '<' | '=' | '>' | '?' | '@' | '^' | '_' | '~'
+HexDigit ::= '0' | '1' | ... | '9' | 'a' | 'A' | ... | 'f' | 'F'
+OctDigit ::= '0' | '1' | ... | '7'
+
+Atom :: = ( Letter | Symbol ) { Letter | Symbol | Digit }
+String ::= '"' { EscapedChar | - ( '"' | '\' ) } '"'
 Bool ::= '#' ( 't' | 'f' )
-Integral ::= digit+
+Integral ::= Digit+
 Float ::= digit+ '.' digit+
-Seq ::= { Expr }
-ListInternals ::= '' | ( parseExpr { spaces parseExpr} )
-Expr ::= parseString | parseAtom | parseNumber | parseBool | parseQuoted | parseList
-Number ::= parseFloat | parseDecimal | parseHex | parseOct | parseBin
-Quoted ::= ''' parseExpr
-Hex ::= '#x' hexDigit+
-Oct ::= '#o' octDigit+
+Hex ::= '#x' HexDigit+
+Oct ::= '#o' OctDigit+
 Bin ::= '#b' ( '0' | '1' )+
-Decimal ::= [ '#d' ] parseIntegral
+Decimal ::= [ '#d' ] Integral
+Number ::= Float | Decimal | Hex | Oct | Bin
+
+ListInternals ::= '' | ( Expr { Spaces Expr } { Spaces } )
+List ::= '(' ListInternals ')'
+Expr ::= String | Atom | Number | Bool | Quoted | List
+Quoted ::= ''' Expr
+Seq ::= { Expr }
 ```
 
 
