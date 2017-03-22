@@ -83,7 +83,7 @@ This looks great, so we can write the new data to a file:
 ```
 wrangell>>> (outputFile "mpg_clean.csv")
 ```
-Now just quit Wrangell with `CTRL-D`, and load `mpg_clean.csv` in a numerical computation package to do the regression!
+Now just quit Wrangell with `CTRL-D` or by typing `quit`, and load `mpg_clean.csv` in a numerical computation package to do the regression!
 
 Finally, if this data wrangling will be done repeatedly, make a script for it:
 ```
