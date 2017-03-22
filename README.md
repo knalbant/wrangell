@@ -29,6 +29,8 @@ Now, ultimately we would like to run a regression analysis on this dataset, to t
 
 We can use Wrangell to load in this data and perform operations to fix these issues.
 
+### Loading Data
+
 Start by launching Wrangell in REPL mode with this input file:
 ```bash
 ./wrangell Examples/mpg/mpg.csv
@@ -50,12 +52,17 @@ wrangell>>> (printTable)
 <Top> 8 350.0 165.0 4142.0 11.5 70 1 chevrolet chevelle concours (sw)
 ...
 ```
+
+### Dropping Incomplete Data
+
 Clearly, Wrangell has imported the data we wanted. But what is this strange looking **`<top>`** in the third row? This is how Wrangell denotes **incomplete data**. In particular, this data is incomplete because we specified the type of the column as `float`, but it actually contained the string `NA`. 
 
 Doing regression over incomplete data is not great, so let's just get rid of rows that have incomplete data. This is easy using Wrangell's `(dropIncomplete)`:
 ```
 wrangell>>> (dropIncomplete)
 ```
+
+### Dropping Columns
 
 Ok, so far we have imported our data, applied types and labels to the columns, and removed incomplete data. The last transformation to do before doing regression is getting rid of columns we don't want. In particular, the columns `name`, `origin`, and `model` are not helpful for the regression, so we can just drop them:
 ```
