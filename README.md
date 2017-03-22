@@ -107,11 +107,11 @@ Wrangell inherits a great deal of its syntax from Scheme what follows is a brief
 ### Function Definition
 Wrangell supports named function definitions of the form:
 ```
-(define (func_name [args]) (body))
+(define (func_name [args]) body)
 ```
 As well as support for recursive functions:
 ```
-(define (factorial n) (if (= n 0) 1 (\* n (factorial (- n 1)))
+(define (factorial n) (if (= n 0) 1 (* n (factorial (- n 1)))
 ```
 as well as lambdas...
 ```
