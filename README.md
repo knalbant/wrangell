@@ -16,7 +16,7 @@ After building, there should be an executable `./wrangell`. Let's look at the sy
 ```
 Now, let's look at the syntax of the Wrangell language by example.  First, we need a data file that we want to work with. Get started by looking at `Examples/mpg/mpg.csv`. The first few lines look like:
 
-| No headers | | | | | | | | |
+| No headers... | | | | | | | | |
 | ------------- | ------------- | -  | -  | -  | -  | -  | -  | -  |
 | 18.0 | 8. | 307.0 | 130.0 | 3504. | 12.0 | 70. | 1. | "chevrolet chevelle malibu" |
 | 15.0 | 8. | 350.0 | 165.0 | 3693. | 11.5 | 70. | 1. | "buick skylark 320" |
