@@ -122,6 +122,8 @@ We decided that Wrangell should support the following transformation operations 
 TODO: add stuff about doing transformations on data
 \end{comment}
 
+We represented the Wrangell abstract syntax tree via the WVal algebraic data type (Figure \ref{wvalAbstract}).
+
 
 
 \onecolumn
@@ -205,44 +207,28 @@ $\sigma ' [ M ] = \{(t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}',...,m_
 \label{bigStep}
 \end{figure}
 
+
+
 \begin{figure}
-\textbf{Wrangell Functionality Syntax}\par\medskip
-\caption{Wrangell Functionality Syntax}
-\label{funcSyntax}
-\begin{enumerate}
-\item[Function Definition:]
-$\\\\$
-Generic:
+\textbf{WVal: An Algebraic Data Type Representing The Wrangell Abstract Syntax Tree}
+\caption{}
+\label{wvalAbstract}
 \begin{lstlisting}
-	(define (func_name [args]) body)
+Wrangell Values}
+data WVal = Atom String
+          | List [WVal]
+          | String String
+          | Bool Bool
+          | Integral Integer
+          | Float Double
+          | BuiltIn ([WVal] -> ThrowsError WVal)
+          | Seq [WVal]
+          | Func { params :: [String], body :: [WVal], closure :: Env }
+          | IOFunc ([WVal] -> IOThrowsError WVal)
+          | Top -- Everythign is a subtype of Top
+          | Unit
 \end{lstlisting}
-Recursive Functions:
-\begin{lstlisting}
-	(define (factorial n) (if (= n 0) 1 (* n (factorial (- n 1)))
-\end{lstlisting}
-
-Lambda Functions:
-\begin{lstlisting}
-	(lambda (x y) (+ (* 2 x) y))
-\end{lstlisting}
-
-\item[Constant Definition:]
-$\\$
-\begin{lstlisting}
-	(define constant_name expression) 
-\end{lstlisting}
-
-\item[if-then-else:]
-$\\$
-\begin{lstlisting}
-	(if predicate-expression then-expression else-expression)
-\end{lstlisting}
-
-
-\end{enumerate}
 \end{figure}
-
-
 \twocolumn
 
 \begin{comment}
@@ -320,7 +306,7 @@ checkAllUnique labels wlabels =
 
 \section{Implementation and Results}
 
-In coding Wrangell, most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. We needed to store and modify table data, a goal which seems to contradict Haskell's `immutable data' requirement. Additionally, we needed to implement a type system which was flexible enough to represent lists for our table columns/rows. Finally, we needed to give Wrangell the ability to read and write csv files. For specific syntax for Wrangell's functionality, please see Figure \ref{funcSyntax}.
+In coding Wrangell, most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. We needed to store and modify table data, a goal which seems to contradict Haskell's `immutable data' requirement. Additionally, we needed to implement a type system which was flexible enough to represent lists for our table columns/rows. Finally, we needed to give Wrangell the ability to read and write csv files.
 
 \subsection{Modeling Wrangell After Scheme}
 Wrangell's syntax is heavily inspired by Scheme's (a Lisp dialect) syntax. For more on Scheme see 'Related Work' below. 
