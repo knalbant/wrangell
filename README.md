@@ -163,7 +163,7 @@ Float ::= digit+ '.' digit+
 ```
 Seq ::= { Expr }
 ```
-###ListInternals
+### ListInternals
 ```
 ListInternals ::= '' | ( parseExpr { spaces parseExpr} )
 ```
@@ -171,27 +171,27 @@ ListInternals ::= '' | ( parseExpr { spaces parseExpr} )
 ```
 Expr ::= parseString | parseAtom | parseNumber | parseBool | parseQuoted | parseList
 ```
-###Number
+### Number
 ```
 Number ::= parseFloat | parseDecimal | parseHex | parseOct | parseBin
 ```
-###Quoted
+### Quoted
 ```
 Quoted ::= ''' parseExpr
 ```
-###Hex
+### Hex
 ```
 Hex ::= '#x' hexDigit+
 ```
-###Oct
+### Oct
 ```
 Oct ::= '#o' octDigit+
 ```
-###Bin
+### Bin
 ```
 Bin ::= '#b' ( '0' | '1' )+
 ```
-###Decimal
+### Decimal
 ```
 Decimal ::= [ '#d' ] parseIntegral
 ```
