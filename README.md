@@ -83,7 +83,7 @@ This looks great, so we can write the new data to a file:
 ```
 wrangell>>> (outputFile "mpg_clean.csv")
 ```
-Now just quit Wrangell with `CTRL-D`, and load `mpg_clean.csv` in a numerical computation package to do the regression!
+Now just quit Wrangell with `CTRL-D` or by typing `quit`, and load `mpg_clean.csv` in a numerical computation package to do the regression!
 
 Finally, if this data wrangling will be done repeatedly, make a script for it:
 ```
@@ -100,4 +100,36 @@ Finally, if this data wrangling will be done repeatedly, make a script for it:
 which can then be reused like so:
 ```
 ./wrangell mpg.wl [input.csv] [output.csv]
+```
+## Overview of provided functionality 
+Wrangell inherits a great deal of its syntax from Scheme what follows is a brief rundown of what's provided. 
+
+### Function Definition
+Wrangell supports named function definitions of the form:
+```
+(define (func_name [args]) body)
+```
+As well as support for recursive functions:
+```
+(define (factorial n) (if (= n 0) 1 (* n (factorial (- n 1)))
+```
+as well as lambdas...
+```
+(lambda (x y) (+ (* 2 x) y))
+```
+### Constant definition
+```
+(define constant_name expression) 
+```
+e.g.: 
+```
+(define x (+ 1 2 3 4))
+```
+### if-then-else
+```
+(if predicate-expression then-expression else-expression)
+```
+e.g.:
+```
+(if (< n 100) (* n 2) n)
 ```
