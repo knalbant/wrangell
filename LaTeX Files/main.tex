@@ -94,7 +94,7 @@ We focused our desired data-wrangling tasks on one format: a table of data in a 
 \end{enumerate}
 
 
-A motivating example for Wrangell could be the following: A small business has many csv files (say, one for each year the company has been active) with customer data. Each file has a column for various items including the customer's name, address, phone number, and credit card number. Now say the business wanted to contract some advertising company to mail a promotional catalog to each of its customers. In this case, the business would want to share its customer database with the advertising company. However, sharing customer credit card information with the advertising company would be both unnecessary and dangerous. In this case,  the business would want an easy way to make copies of the customer information files with the credit card information column removed. Such a transformation should be supported by Wrangell.    
+A motivating example for Wrangell could be the following: A small business has many csv files (say, one for each year the company has been active) with customer data. Each file has a column for various items including the customer's name, address, phone number, and credit card number. Now say the business wanted to contract some advertising company to mail a promotional catalog to each of its customers. In this case, the business would want to share its customer database with the advertising company. However, sharing customer credit card information with the advertising company would be both unnecessary and dangerous. In this case,  the business would want an easy way to make copies of the customer information files with the credit card information column removed. Such a transformation can be achieved with Wrangell.    
 
 
 \section{Approach}
@@ -105,12 +105,11 @@ Because our team members only had beginner or intermediate levels of Haskell kno
 \begin{comment}
 As a result, Wrangell's application subjects are limited to tables of data wherein columns are separated by either a comma or a user-specified delimiter. Furthermore, we allow the first row of data in a csv file to be a list of comma-separated labels, one for each column. We require that each column have a \emph{unique} label, to avoid ambiguity in potential future Wrangell features which may seek to identify columns per their labels. We decided to ultimately apply Wrangell to a variety of csv files. See Figure \ref{exampleTable} for an example of a Wrangell-compatible data table. 
 \end{comment}
-At present Wrangell supports simple file types for input and output such as csv files, or character delimited files. However the Wrangell interpreter is equipped such that if another user were to define a function to transform input file types to the intermediate representation, and a function to transform from the intermediate representation to the output file format, that file format would then be fully supported with no further modifications to the interpreter being necessary.
+At present Wrangell supports simple file types for input and output such as csv files, such as in Figure \ref{exampleTable}, or character delimited files. However the Wrangell interpreter is equipped such that if another user were to define a function to transform input file types to the intermediate representation, and a function to transform from the intermediate representation to the output file format, that file format would then be fully supported with no further modifications to the interpreter being necessary.
 
 
 \subsection{Semantics of Wrangell}
-We decided that Wrangell should support the following transformation operations (See big-step semantics in Figure \ref{bigStep}):
-remove/insert a column, insert a column, remove a row, insert a row, and run transformations on individual columns of data.
+We decided that Wrangell should support the following transformation operations (See big-step semantics in Figure \ref{bigStep}): remove a column, remove rows with incomplete data, and run transformations on individual or multiple columns of data. Additionally, we have functions for Haskell-style folding over a column, and common statistical computations.
 
 \begin{comment}
 TODO: add stuff about doing transformations on data
@@ -144,17 +143,23 @@ Blackie,	43, F,	Shirley Temple,	School of Lyfe,		999771111\\
 \textbf{Wrangell Big-Step Semantics}\par\medskip
 \caption{Big-step semantics for Wrangell's table manipulation functions}
 \begin{enumerate}
-\item Table$\\$
+\item Table (Wrangell State)$\\$
 \begin{equation*}
-\Sigma = \bigcup_{n=0,r=0}^{\infty}  \{M|t_i \in T, m_{*i} \in V(t_i:r),l_i \in \{Strings\}, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
+\Sigma = \bigcup_{n=0,r=0}^{\infty}  \{\sigma \mid t_i \in T, m_{*i} \in V(t_i, r),l_i \in Strings, \forall l_i \nexists l_j s.t. \ l_i=l_j \wedge j\neq i\}
 \end{equation*}
-$\sigma[M] = (t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*n}), (l_0,l_1,...,l_n)$
+where 
+\begin{align*}
+\sigma &= ((t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*n}), (l_0,l_1,...,l_n)) \\
+T &= \{ String, Bool, Integral, Float, \top \} \\
+V(t, r) &= \textrm{Vector space of dimension } r \textrm{ over type } t\\
+Strings &= \textrm{Set of valid Wrangell strings}
+\end{align*}
 
 \item Drop Column$\\$
 \begin{equation*}
 \infer{<dropCol \ label, \sigma> \Downarrow \\
 \sigma ' 
-}{<label,\sigma> \Downarrow l_i}
+}{label = l_i}
 \end{equation*}
 \begin{equation*}
 \infer{<dropCol \ i, \sigma> \Downarrow \\
@@ -163,15 +168,16 @@ $\sigma[M] = (t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*n}), (l_0,l_1,...,l_n)$
 \end{equation*}
 
 
-$\sigma ' [ M ] = \{(t_0,t_1,...,t_{i-1},t_{i+1},...,t_n),(m_{*0},m_{*1},...,m_{*{i-1}},m_{*{i+1}},...,m_{*n}), (l_0,l_1,...,l_{i-1},l_{i+1},...,l_n)\}$
+$\sigma ' = \{(t_0,t_1,...,t_{i-1},t_{i+1},...,t_n),(m_{*0},m_{*1},...,m_{*{i-1}},m_{*{i+1}},...,m_{*n}), (l_0,l_1,...,l_{i-1},l_{i+1},...,l_n)\}$
 
+\begin{comment}
 \item Drop Row$\\$\\
 \begin{equation*}
 \infer{<dropRow \ \lambda, \sigma> \Downarrow \\
 \sigma ' 
 }{m_{*i}'=\{m_{ji}|<\lambda m_{ji}, \sigma> \Downarrow False\}}
 \end{equation*}
-$\sigma ' [ M ] = \{(t_0,t_1,...,t_n),(m_{*0}',m_{*1}',...,m_{*n}'), (l_0,l_1,...,l_n)\}$
+$\sigma ' = \{(t_0,t_1,...,t_n),(m_{*0}',m_{*1}',...,m_{*n}'), (l_0,l_1,...,l_n)\}$
 
 \item Insert Column$\\$
 \begin{equation*}
@@ -179,23 +185,94 @@ $\sigma ' [ M ] = \{(t_0,t_1,...,t_n),(m_{*0}',m_{*1}',...,m_{*n}'), (l_0,l_1,..
 \sigma ' 
 }{j \in [0,n+1] \wedge \ label \ \notin \{l_1,l_2,...,l_n\}}
 \end{equation*}
-$\sigma ' [ M ] = \{(t_0,t_1,...,t_{i-1},type,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}...,m_{*n}), (l_0,l_1,...,l_{i-1},label,...,l_n)\}$
+$\sigma ' = \{(t_0,t_1,...,t_{i-1},type,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}...,m_{*n}), (l_0,l_1,...,l_{i-1},label,...,l_n)\}$
+\end{comment}
 
 
 \item Transform Column$\\$
 \begin{equation*}
 \infer{<transformCol \ \lambda \ label, \sigma> \Downarrow \\
 \sigma ' 
-}{<label,\sigma> \Downarrow l_i  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
+}{label = l_i  \ \wedge \ <transformCol \ \lambda \ i, \sigma> \Downarrow \\
+\sigma'}
 \end{equation*}
 
 \begin{equation*}
 \infer{<transformCol \ \lambda \ i, \sigma> \Downarrow \\
 \sigma ' 
-}{i \in [0,n]  \ \wedge \  m_{*i}' = \{m_{ji}'|<\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
+}{i \in [0,n]  \ \wedge \  m_{*i}' = \{m_{ji}' \mid <\lambda m_{ji}, \sigma> \Downarrow m_{ji}'\}}
 \end{equation*}
 
-$\sigma ' [ M ] = \{(t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_0,l_1,...,l_n)\}$
+$\sigma ' = \{(t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_0,l_1,...,l_n)\}$
+
+
+
+\item Transform Multiple Columns$\\$
+\begin{equation*}
+\infer{<transformCols \ label_1 \ label_2 \ \cdots \ label_k \ \lambda \  label, \sigma> \Downarrow \\
+\sigma ' 
+}{label_j = l_{i_j} \ \wedge label = l_i \ \wedge <transformCols \ i_1 \ \cdots \ i_k \ \lambda \ i, \sigma> \Downarrow \sigma'}
+\end{equation*}
+
+
+\begin{equation*}
+\infer{<transformCols \ i_1 \ i_2 \ \cdots \ i_k \ \lambda \  i, \sigma> \Downarrow \\
+\sigma ' 
+}{i_k \in [0,n] \ \wedge m_{*i}' = \{m_{ji}' \mid <\lambda \ m_{j i_1} \ m_{j i_2} \ \cdots \ m_{j i_k}, \sigma> \Downarrow m_{ji}'\}}
+\end{equation*}
+
+$\sigma ' = \{(t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_0,l_1,...,l_n)\}$
+
+
+
+\item Drop Incomplete$\\$
+\begin{equation*}
+\infer{<dropIncomplete, \sigma> \Downarrow \\
+\sigma ' 
+}{m_{j *}' = \left\{
+  \begin{array}{ll}
+    Nothing & (\exists i)(m_{j i} = \top) \\
+    m_{j *} & \textrm{otherwise} \\
+  \end{array} 
+\right.
+}
+\end{equation*}
+
+$\sigma ' = \{(t_0,t_1,...,t_n),(m_{*0}',m_{*1}',...,m_{*n}'), (l_0,l_1,...,l_n)\}$
+
+\textrm{That is, all rows that contain a $\top$ will be removed.}
+\end{enumerate}
+\label{bigStep}
+\end{figure}
+
+
+
+
+\begin{figure}
+\textbf{Wrangell Big-Step Semantics Continued}\par\medskip
+\caption{Big-step semantics for Wrangell's table manipulation functions}
+\begin{enumerate}
+\setcounter{enumi}{5}
+
+\item Fold$\\$
+\begin{equation*}
+\infer{<fold \ label \ \lambda \ start, \sigma> \Downarrow \\
+x 
+}{label = l_i  \ \wedge \ <fold \ i \ \lambda \ start, \sigma> \Downarrow \\
+x}
+\end{equation*}
+
+\begin{equation*}
+\infer{<fold \ i \ \lambda \ start, \sigma> \Downarrow \\
+x 
+}{
+  <foldl \ \lambda \ start \ m_{* i}, \sigma> \Downarrow_{HS} m_{* i}'
+}
+\end{equation*}
+
+$\sigma ' = \{(t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}',...,m_{*n}), (l_0,l_1,...,l_n)\}$
+
+\textrm{where $\Downarrow_{HS}$ denotes the big-step semantics of Haskell}
 
 \end{enumerate}
 \label{bigStep}
@@ -205,10 +282,9 @@ $\sigma ' [ M ] = \{(t_0,t_1,...,t_n),(m_{*0},m_{*1},...,m_{*i-1},m_{*i}',...,m_
 
 \begin{figure}
 \textbf{WVal: An Algebraic Data Type Representing The Wrangell Abstract Syntax Tree}
-\caption{}
+\caption{Wrangell Values}
 \label{wvalAbstract}
 \begin{lstlisting}
-Wrangell Values}
 data WVal = Atom String
           | List [WVal]
           | String String
@@ -300,7 +376,7 @@ checkAllUnique labels wlabels =
 
 \section{Implementation and Results}
 
-In coding Wrangell, most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. We needed to store and modify table data, a goal which seems to contradict Haskell's `immutable data' requirement. Additionally, we needed to implement a type system which was flexible enough to represent lists for our table columns/rows. Finally, we needed to give Wrangell the ability to read and write csv files.
+In coding Wrangell, most of our challenges centered on our need to mimic imperative behavior in Haskell, a functional language. We needed to store and modify the table data, a goal which seems to contradict Haskell's `immutable data' requirement. Additionally, we needed to implement a type system which was flexible enough to represent lists for our table columns/rows. Finally, we needed to give Wrangell the ability to read and write csv files.
 
 \subsection{Modeling Wrangell After Scheme}
 Wrangell's syntax is heavily inspired by Scheme's (a Lisp dialect) syntax. For more on Scheme see 'Related Work' below. 
@@ -417,7 +493,7 @@ car badArgList     =
 \end{figure}
 
 \subsection{Reading and Writing csv Files}
-For Wrangell's reading, parsing, and writing of csv files, we used  existing code from the public GitHub repository MissingH \cite{dataCSV}. Specifically we used CSV.hs, which uses Data.csv to parse comma-separated strings into lists of strings. 
+For Wrangell's reading, parsing, and writing of csv files, we used  existing code from the public GitHub repository MissingH \cite{dataCSV}. Specifically we used Data.CSV, which parses comma-separated strings into lists of strings. 
 
 To support potential extension of Wrangell we wrote code which converts input file formats to an intermediate Wrangell table. Additionally we wrote code to convert from the intermediate Wrangell table to an output file format. Because Wrangell's data transformations operate on the intermediate table, this allows Wrangell to be applicable to a variety of file formats. This means that, hypothetically, a future iteration of Wrangell could read in a csv file, and output, say, a txt file. 
 
@@ -449,9 +525,9 @@ As a Domain Specific Language, Wrangell was intended to be a fast, simple tool t
 
 
 \section{Conclusions}
-We have introduced Wrangell a novel DSL with familiar Lisp-like syntax which is particularly well suited to  data-munging style applications. Wrangell provides convenient utilities and syntax for easily manipulating and transforming data, and outputting to any sort of file given that an implementation is provided.
+We have introduced Wrangell, a novel DSL with familiar Lisp-like syntax which is particularly well suited to  data-munging style applications. Wrangell provides convenient utilities and syntax for easily manipulating and transforming data, and outputting to any sort of file given that an implementation is provided.
 
-Future improvements to Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). It would also be useful if Wrangell could handle files with inconsistent ordering of columns. Additionally, we would want Wrangell to be able to handle data tables with an unknown number of columns. 
+Future improvements to Wrangell might include additional transformations, for example modifying rows, inserting columns, inserting rows, etc. Additionally, we would want Wrangell to be able to handle data tables with an unknown number of columns. 
 
 As mentioned in our discussion of Wrangell's capabilities for reading and writing csv type files, Wrangell might also be extended to read in and output more file formats.  
 
