@@ -101,3 +101,35 @@ which can then be reused like so:
 ```
 ./wrangell mpg.wl [input.csv] [output.csv]
 ```
+## Overview of provided functionality 
+Wrangell inherits a great deal of its syntax from Scheme what follows is a brief rundown of what's provided. 
+
+### Function Definition
+Wrangell supports named function definitions of the form:
+```
+(define (func_name [args]) (body))
+```
+As well as support for recursive functions:
+```
+(define (factorial n) (if (= n 0) 1 (\* n (factorial (- n 1)))
+```
+as well as lambdas...
+```
+(lambda (x y) (+ (* 2 x) y))
+```
+### Constant definition
+```
+(define constant_name expression) 
+```
+e.g.: 
+```
+(define x (+ 1 2 3 4))
+```
+### if-then-else
+```
+(if predicate-expression then-expression else-expression)
+```
+e.g.:
+```
+(if (< n 100) (* n 2) n)
+```
