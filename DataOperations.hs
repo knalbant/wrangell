@@ -222,7 +222,9 @@ transformColumns env table indices destIndex f = do
 applyBinaryRowFunc :: Env -> Table -> WVal -> Integer -> WVal -> [WVal] -> IOThrowsError WVal
 applyBinaryRowFunc env table f index acc row = do
   let arg = row !! (fromIntegral index)
-  eval env table (List [f, acc, arg])
+  if arg == Top
+    then return acc
+    else eval env table (List [f, acc, arg])
 
 transformColumnIndex :: Env -> Table -> Integer -> WVal -> IOThrowsError WVal
 transformColumnIndex env table index f = do
@@ -388,7 +390,7 @@ setHasHeader env table = do
     then throwError $ TableOperationOrder "hasHeader" "formatTable"
     else return Unit
 
-  doTableWrite env table (\e t -> t {hasHeader = True}) 
+  doTableWrite env table (\e t -> t {hasHeader = True})
 
   return Unit
 
