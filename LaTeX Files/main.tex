@@ -105,7 +105,7 @@ Because our team members only had beginner or intermediate levels of Haskell kno
 \begin{comment}
 As a result, Wrangell's application subjects are limited to tables of data wherein columns are separated by either a comma or a user-specified delimiter. Furthermore, we allow the first row of data in a csv file to be a list of comma-separated labels, one for each column. We require that each column have a \emph{unique} label, to avoid ambiguity in potential future Wrangell features which may seek to identify columns per their labels. We decided to ultimately apply Wrangell to a variety of csv files. See Figure \ref{exampleTable} for an example of a Wrangell-compatible data table. 
 \end{comment}
-At present Wrangell supports simple file types for input and output such as csv files, or character delimited files however the Wrangell interpreter we wrote in Haskell is equipped such that if another user were to define a function to transform input file types to the intermediate representation and a function to transform from the intermediate representation to the output file format that file format would then be fully supported with no further modifications to the interpreter being necessary.
+At present Wrangell supports simple file types for input and output such as csv files, or character delimited files. However the Wrangell interpreter is equipped such that if another user were to define a function to transform input file types to the intermediate representation, and a function to transform from the intermediate representation to the output file format, that file format would then be fully supported with no further modifications to the interpreter being necessary.
 
 
 \subsection{Semantics of Wrangell}
@@ -288,7 +288,7 @@ Wrangell's syntax is heavily inspired by Scheme's (a Lisp dialect) syntax. For m
 
 
 \subsection{Working with Haskell's Immutable Data}
-In Haskell, data is immutable (see 'Immutable Data and Monads' in `Related Work'). Yet, we needed Wrangell to store and modify information about our original and transformed data tables. Our solution was to define tables using the \emph{data.IORef} package. With this package we constructed our \emph{Table} data type to be an \emph{IORef} of the data type Table'. The code in Figure \ref{tableIORef} demonstrates our use of the IO monad during construction of an empty data table for later use. Packaging data in an IORef allows for very easy imperative style data manipulation through two key functions, readIORef and writeIORef, which behave exactly in the manner that their name implies. 
+In Haskell, data is immutable. Yet we needed Wrangell to store and modify information about our original and transformed data tables. Our solution was to define tables using the \emph{data.IORef} package. With this package we constructed our \emph{Table} data type to be an \emph{IORef} of the data type Table'. The code in Figure \ref{tableIORef} demonstrates our use of the IO monad during construction of an empty data table for later use. Packaging data in an IORef allows for very easy imperative style data manipulation through two key functions, readIORef and writeIORef, which behave exactly in the manner that their name implies. 
 
 \begin{figure}
 \caption{Creation of the `Table' data type within the IO Monad}
@@ -346,8 +346,8 @@ if' [condition, t, f] =
 \label{fig:inflexType}
 \end{figure}
 In this strategy we use funcTable to constrain exactly what inputs a function can accept. However, for the \emph{car} function (which computes the first item of a list), in order to describe lists of varying length and types, we would have to include definitions for every possible combination of lengths and types!
-Our solution (Figure \ref{fig:flexType}) was to move the type-checking of inputs into the functions themselves. This allows more flexibility in funcTable. However, because it would now be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution, described in related work, was to implement exception handling the exceptT monad transformer mentioned earlier.
-An additional benefit of the approach we eventually went with is that when an operator or function is exposed by our function table any expressions defined in terms of these functions inherit the polymorphism of Haskell's type system as a consequence of the way things are structured.
+Our solution (Figure \ref{fig:flexType}) was to move the type-checking of inputs into the functions themselves. This allows more flexibility in funcTable. However, because it would now be possible to pass incompatible data to a function, we needed a way for functions to handle potential errors. Our solution was to implement exception handling via the exceptT monad transformer mentioned earlier.
+An additional benefit of the approach we eventually went with is that when an operator or function is exposed by our function table, any expressions defined in terms of these functions inherit the polymorphism of Haskell's type system as a consequence of the way things are structured.
 \begin{figure}
 \caption{Flexible type system: Type-checking now takes place in if' and car function definitions. No restrictions on types in funcTable' definitions.}
 \begin{lstlisting}
@@ -430,7 +430,7 @@ As a Domain Specific Language, Wrangell was intended to be a fast, simple tool t
 
 
 \section{Conclusions}
-We have introduced Wrangell a novel DSL with familiar Lisp-like syntax which is particularly well suited to  data-munging style applications. Wrangell provides convenient utilities and syntax for easily manipulating data and transforming data and outputting to any sort of file provided an implementation is provided.
+We have introduced Wrangell a novel DSL with familiar Lisp-like syntax which is particularly well suited to  data-munging style applications. Wrangell provides convenient utilities and syntax for easily manipulating and transforming data, and outputting to any sort of file given that an implementation is provided.
 
 Future improvements to Wrangell might include improvement in label analysis, a feature which would allow users to identify columns purely via their label. For example, an operation meant to aggregate email addresses for all customers since 1995 would need to handle customer data files wherein the column "email address" is not present (e.g. files prior to 2002). It would also be useful if Wrangell could handle files with inconsistent ordering of columns. Additionally, we would want Wrangell to be able to handle data tables with an unknown number of columns. 
 
