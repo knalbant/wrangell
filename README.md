@@ -55,7 +55,6 @@ Clearly, Wrangell has imported the data we wanted. But what is this strange look
 Doing regression over incomplete data is not great, so let's just get rid of rows that have incomplete data. This is easy using Wrangell's `(dropIncomplete)`:
 ```
 wrangell>>> (dropIncomplete)
-
 ```
 
 Ok, so far we have imported our data, applied types and labels to the columns, and removed incomplete data. The last transformation to do before doing regression is getting rid of columns we don't want. In particular, the columns `name`, `origin`, and `model` are not helpful for the regression, so we can just drop them:
